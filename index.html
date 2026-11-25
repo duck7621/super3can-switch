@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f3f3f6" />
     <link rel="icon" href="data:," />
     <title>SUPER_3CAN 網頁開關</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -12,46 +13,76 @@
     <style>
       :root {
         color-scheme: light dark;
-        --bg: #f2f1ed;
-        --surface: #ffffff;
-        --surface-2: #e9e7e1;
-        --ink: #191b1e;
-        --ink-2: #5a5e63;
-        --line: #d8d5cd;
-        --accent: #0f766e;
+        --bg: #f3f3f6;
+        --bg-blur: rgba(243,243,246,.82);
+        --card: rgba(43,43,46,.07);
+        --field: #e3e3e0;
+        --field-ink: #2b2b2e;
+        --ink: #111114;
+        --muted: #5f5f6a;
+        --muted2: #777780;
+        --line: rgba(43,43,46,.16);
+        --accent: #2b2b2e;
         --accent-ink: #ffffff;
-        --accent-soft: #d9ede9;
-        --on: #0f766e;
-        --off-track: #c9c6bd;
-        --danger: #b3372c;
-        --warn-bg: #fdf3e0;
-        --warn-line: #e3c98a;
-        --warn-ink: #6d5410;
+        --ok: #16a34a;
+        --busy: #2256d6;
+        --red: #c62828;
+        --amber: #9b6811;
+        --off-track: #b7b7b2;
         --log-bg: #14161a;
         --log-ink: #d7dae0;
         --log-tx: #7dd3c8;
         --log-rx: #f5c86e;
         --log-sys: #8b919c;
-        --radius: 10px;
+        --warn-bg: #fdf3e0;
+        --warn-line: #e3c98a;
+        --warn-ink: #6d5410;
+        --tabbar-bg: #2b2b2e;
+      }
+      html[data-theme="dark"] {
+        --bg: #0a0a0d;
+        --bg-blur: rgba(10,10,13,.82);
+        --card: rgba(255,255,255,.06);
+        --field: #1d1d21;
+        --field-ink: #d2d2d7;
+        --ink: #f3f3f6;
+        --muted: #9696a0;
+        --muted2: #777780;
+        --line: rgba(255,255,255,.14);
+        --accent: #d2d2d7;
+        --accent-ink: #111114;
+        --ok: #22c55e;
+        --busy: #60a5fa;
+        --red: #f87171;
+        --amber: #fbbf24;
+        --off-track: #4a5057;
+        --log-bg: #0a0b0d;
+        --warn-bg: #2c2410;
+        --warn-line: #6b5518;
+        --warn-ink: #ecc964;
       }
       @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #101214;
-          --surface: #1a1d20;
-          --surface-2: #24282c;
-          --ink: #eceef0;
-          --ink-2: #9aa0a6;
-          --line: #33383d;
-          --accent: #2dd4bf;
-          --accent-ink: #06231f;
-          --accent-soft: #173a35;
-          --on: #2dd4bf;
+        html:not([data-theme]) {
+          --bg: #0a0a0d;
+          --bg-blur: rgba(10,10,13,.82);
+          --card: rgba(255,255,255,.06);
+          --field: #1d1d21;
+          --field-ink: #d2d2d7;
+          --ink: #f3f3f6;
+          --muted: #9696a0;
+          --muted2: #777780;
+          --line: rgba(255,255,255,.14);
+          --accent: #d2d2d7;
+          --accent-ink: #111114;
+          --ok: #22c55e;
+          --busy: #60a5fa;
+          --red: #f87171;
+          --amber: #fbbf24;
           --off-track: #4a5057;
-          --danger: #f0857a;
+          --log-bg: #0a0b0d;
           --warn-bg: #2c2410;
           --warn-line: #6b5518;
           --warn-ink: #ecc964;
-          --log-bg: #0a0b0d;
         }
       }
       * { box-sizing: border-box; }
@@ -60,69 +91,88 @@
         margin: 0;
         background: var(--bg);
         color: var(--ink);
-        font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
         font-size: 16px;
         line-height: 1.55;
       }
-      .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
-      main {
-        max-width: 640px;
-        margin: 0 auto;
-        padding: 20px 16px 48px;
+      .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .app { max-width: 520px; margin: 0 auto; min-height: 100svh; padding: 0 14px 120px; }
+
+      /* top bar */
+      .topbar {
+        position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+        width: 100%; max-width: 520px; height: 48px;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 14px;
+        background: var(--bg-blur);
+        -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--line);
+        z-index: 40;
       }
-      h1 {
-        font-size: 26px;
-        font-weight: 900;
-        letter-spacing: 0.01em;
-        margin: 4px 0 6px;
+      .logo { font-size: 14px; font-weight: 800; letter-spacing: .02em; }
+      .pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--field); color: var(--field-ink);
+        border-radius: 999px; padding: 5px 11px;
+        font-size: 12px; font-weight: 700;
+        max-width: 62%;
       }
-      .lede { color: var(--ink-2); margin: 0 0 20px; font-size: 15px; }
+      .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex: none; }
+      .pill.on .dot { background: var(--ok); }
+      .pill.busy .dot { background: var(--busy); }
+      .pill span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      /* hero */
+      .hero { text-align: center; padding: 78px 8px 6px; }
+      .hero-word { font-size: 46px; font-weight: 520; letter-spacing: -.04em; line-height: 1.1; margin: 0; }
+      .hero-word.on { color: var(--ok); }
+      .hero-word.busy { color: var(--busy); }
+      .hero-sub { color: var(--muted); font-size: 14px; margin: 8px 0 18px; }
+
+      /* data tiles */
+      .tiles {
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        background: var(--field); border-radius: 17px;
+        padding: 12px 0; margin-bottom: 16px;
+      }
+      .tile { text-align: center; padding: 0 4px; border-left: 1px solid var(--line); min-width: 0; }
+      .tile:first-child { border-left: none; }
+      .tile-v { display: block; font-size: 14px; font-weight: 640; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .tile-l { display: block; font-size: 9px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      /* cards */
       section {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
+        background: var(--card);
+        border-radius: 20px;
         padding: 16px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
+        scroll-margin-top: 60px;
       }
       section h2 {
-        font-size: 15px;
-        font-weight: 700;
+        font-size: 18px; font-weight: 700;
         margin: 0 0 12px;
-        display: flex;
-        align-items: baseline;
-        gap: 8px;
+        display: flex; align-items: baseline; gap: 8px;
       }
-      section h2 .tag {
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--ink-2);
-      }
-      .hint { font-size: 13px; color: var(--ink-2); margin: 0 0 12px; }
-      /* status */
-      .status-row { display: flex; align-items: center; gap: 10px; min-height: 28px; }
-      .dot {
-        width: 12px; height: 12px; border-radius: 50%;
-        background: var(--off-track); flex: none;
-      }
-      .dot.on { background: var(--on); box-shadow: 0 0 0 4px var(--accent-soft); }
-      .dot.busy { background: #d99a16; }
-      .status-text { font-weight: 700; font-size: 16px; word-break: break-all; }
-      .char-info { font-size: 12px; color: var(--ink-2); margin-top: 6px; word-break: break-all; }
+      section h2 .tag { font-size: 11px; font-weight: 500; color: var(--muted); }
+      .hint { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+      .char-info { font-size: 12px; color: var(--muted); margin-top: 8px; word-break: break-all; }
+
       label.field-label { display: block; font-size: 13px; font-weight: 700; margin: 16px 0 6px; }
-      select, input[type="text"] {
+      select, input[type="text"], input[type="password"] {
         width: 100%;
         min-height: 48px;
         padding: 10px 12px;
         font: inherit;
         font-size: 15px;
         color: var(--ink);
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 8px;
+        background: var(--field);
+        border: 1px solid transparent;
+        border-radius: 10px;
       }
       .custom-uuid { display: none; margin-top: 10px; }
       .custom-uuid.show { display: block; }
       .custom-uuid input { margin-bottom: 8px; }
+
       .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
       button.btn {
         min-height: 48px;
@@ -130,107 +180,108 @@
         font: inherit;
         font-size: 15px;
         font-weight: 700;
-        border-radius: 8px;
-        border: 1px solid var(--line);
-        background: var(--surface-2);
-        color: var(--ink);
+        border-radius: 10px;
+        border: none;
+        background: var(--field);
+        color: var(--field-ink);
         cursor: pointer;
       }
-      button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-      button.btn.danger { color: var(--danger); }
+      button.btn.primary { background: var(--accent); color: var(--accent-ink); }
+      button.btn.danger { color: var(--red); }
       button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
       button.btn:active:not(:disabled) { transform: translateY(1px); }
+
       .banner {
         border: 1px solid var(--warn-line);
         background: var(--warn-bg);
         color: var(--warn-ink);
-        border-radius: var(--radius);
+        border-radius: 16px;
         padding: 12px 14px;
         font-size: 14px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
         display: none;
       }
       .banner.show { display: block; }
       .banner strong { display: block; margin-bottom: 2px; }
+
       /* switches */
       .sw-row {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 10px 0;
+        padding: 12px 0;
         border-top: 1px solid var(--line);
-        min-height: 64px;
+        min-height: 68px;
       }
       .sw-row:first-of-type { border-top: none; }
       .sw-label { flex: 1; min-width: 0; }
       .sw-name { display: block; font-weight: 700; font-size: 16px; }
-      .sw-desc { display: block; font-size: 12.5px; color: var(--ink-2); margin-top: 1px; }
-      .sw-cmd { font-size: 11px; color: var(--ink-2); }
+      .sw-desc { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+      .sw-cmd { font-size: 11px; color: var(--muted); }
       button.switch {
         flex: none;
-        width: 58px; height: 34px;
+        width: 40px; height: 23px;
         border-radius: 999px;
         border: none;
         background: var(--off-track);
         position: relative;
         cursor: pointer;
         padding: 0;
-        margin: -6px -4px;
-        min-height: 44px;
-        background-clip: content-box;
         -webkit-tap-highlight-color: transparent;
       }
       button.switch::after {
         content: "";
         position: absolute;
-        top: 50%; left: 9px;
-        width: 26px; height: 26px;
+        top: 50%; left: 3px;
+        width: 17px; height: 17px;
         border-radius: 50%;
         background: #fff;
         transform: translateY(-50%);
         transition: left 0.18s ease;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.22);
       }
-      button.switch[aria-checked="true"] { background-color: var(--on); }
-      button.switch[aria-checked="true"]::after { left: 27px; }
-      button.switch:disabled { opacity: 0.4; cursor: not-allowed; }
-      button.switch:focus-visible, button.btn:focus-visible, .seg button:focus-visible {
+      button.switch[aria-checked="true"] { background-color: var(--accent); }
+      button.switch[aria-checked="true"]::after { left: 20px; }
+      button.switch:disabled { opacity: 0.42; cursor: not-allowed; }
+      button.switch:focus-visible, button.btn:focus-visible, .seg button:focus-visible, .tabbar button:focus-visible {
         outline: 2px solid var(--accent); outline-offset: 2px;
       }
       @media (prefers-reduced-motion: reduce) {
         button.switch::after { transition: none; }
         button.btn:active:not(:disabled) { transform: none; }
       }
+
       /* segmented */
       .seg {
         display: flex;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        overflow: hidden;
+        background: var(--field);
+        border-radius: 999px;
+        padding: 3px;
         margin-top: 4px;
       }
       .seg button {
         flex: 1;
-        min-height: 48px;
+        min-height: 40px;
         font: inherit;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 700;
-        background: var(--surface);
-        color: var(--ink-2);
+        background: transparent;
+        color: var(--field-ink);
         border: none;
-        border-left: 1px solid var(--line);
+        border-radius: 999px;
         cursor: pointer;
         padding: 8px 4px;
       }
-      .seg button:first-child { border-left: none; }
       .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
       .seg button:disabled { opacity: 0.45; cursor: not-allowed; }
       .seg-label { font-weight: 700; font-size: 16px; display: block; margin-top: 14px; }
-      .seg-desc { font-size: 12.5px; color: var(--ink-2); display: block; margin-bottom: 8px; }
+      .seg-desc { font-size: 12.5px; color: var(--muted); display: block; margin-bottom: 8px; }
+
       /* manual send */
       .manual-row { display: flex; gap: 8px; }
       .manual-row input { flex: 1; min-width: 0; }
       .manual-row button { flex: none; }
+
       /* log */
       .log-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
       .log-head h2 { margin: 0; }
@@ -243,11 +294,11 @@
       .log {
         background: var(--log-bg);
         color: var(--log-ink);
-        border-radius: 8px;
+        border-radius: 12px;
         padding: 12px;
         height: 220px;
         overflow-y: auto;
-        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
         font-size: 12.5px;
         line-height: 1.7;
         margin-top: 10px;
@@ -258,9 +309,32 @@
       .log .rx { color: var(--log-rx); }
       .log .sys { color: var(--log-sys); }
       .log .empty { color: var(--log-sys); }
-      footer { color: var(--ink-2); font-size: 13px; padding: 4px 2px 0; }
+
+      /* settings */
+      .set-row { padding: 12px 0; border-top: 1px solid var(--line); }
+      .set-row:first-of-type { border-top: none; }
+      .set-row .seg-label { margin-top: 0; }
+      footer { color: var(--muted); font-size: 13px; padding: 8px 2px 0; }
       footer p { margin: 0 0 8px; }
-      /* 開頁密碼 */
+
+      /* bottom tab bar */
+      .tabbar {
+        position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+        width: calc(100% - 28px); max-width: 360px; height: 46px;
+        background: var(--tabbar-bg);
+        border-radius: 22px;
+        display: flex; padding: 4px; gap: 4px;
+        z-index: 40;
+      }
+      .tabbar button {
+        flex: 1;
+        border: none; background: transparent; color: #9a9aa0;
+        font: inherit; font-size: 13px; font-weight: 700;
+        border-radius: 18px; cursor: pointer;
+      }
+      .tabbar button.active { background: var(--field); color: var(--field-ink); }
+
+      /* password gate */
       .gate {
         position: fixed; inset: 0; z-index: 50;
         background: var(--bg);
@@ -270,113 +344,499 @@
       .gate.hide { display: none; }
       .gate-card { width: 100%; max-width: 320px; text-align: center; }
       .gate-card h1 { font-size: 24px; margin-bottom: 4px; }
-      .gate-card p { color: var(--ink-2); font-size: 14px; margin: 0 0 8px; }
+      .gate-card p { color: var(--muted); font-size: 14px; margin: 0 0 8px; }
       .gate-card input {
         width: 100%; text-align: center;
         font-size: 22px; letter-spacing: 6px;
         margin: 10px 0;
       }
       .gate-card .btn { width: 100%; }
-      .gate-err { color: var(--danger); font-size: 14px; margin: 8px 0 0; }
+      .gate-err { color: var(--red); font-size: 14px; margin: 8px 0 0; }
     </style>
   </head>
   <body>
     <div class="gate" id="gateBox">
       <div class="gate-card">
         <h1>SUPER_3CAN</h1>
-        <p>請輸入開頁密碼</p>
-        <input type="password" id="gateInput" inputmode="numeric" autocomplete="off" placeholder="密碼" />
-        <button class="btn primary" id="gateBtn" type="button">進入</button>
-        <p class="gate-err" id="gateErr" hidden>密碼不對，請重試</p>
+        <p data-i18n="gate_prompt">請輸入開頁密碼</p>
+        <input type="password" id="gateInput" inputmode="numeric" autocomplete="off" data-i18n-ph="gate_ph" placeholder="密碼" />
+        <button class="btn primary" id="gateBtn" type="button" data-i18n="gate_enter">進入</button>
+        <p class="gate-err" id="gateErr" hidden data-i18n="gate_wrong">密碼不對，請重試</p>
       </div>
     </div>
-    <main>
-      <h1>SUPER_3CAN 網頁開關</h1>
-      <p class="lede">在 BLE Link 裡打開這頁，連上盒子就能按開關。命令和小程序版相同，送出的是文字命令加 <span class="mono">\r\n</span>。</p>
-      <div class="banner" id="noBleBanner">
-        <strong>這個瀏覽器沒有 Web Bluetooth</strong>
-        iPhone 請用 <b>BLE Link</b> App 打開這頁；Android／電腦請用 Chrome。Safari 本身連不了藍牙。
-      </div>
-      <div class="banner" id="insecureBanner">
-        <strong>目前不是 HTTPS 連線</strong>
-        Web Bluetooth 只在 HTTPS 頁面運作，請確認網址是 https 開頭。
-      </div>
-      <section aria-labelledby="connH">
-        <h2 id="connH">連線</h2>
-        <div class="status-row">
-          <span class="dot" id="statusDot" aria-hidden="true"></span>
-          <span class="status-text" id="statusText">未連線</span>
+
+    <div class="app">
+      <header class="topbar">
+        <span class="logo">SUPER_3CAN</span>
+        <span class="pill" id="statusPill"><span class="dot" id="statusDot"></span><span id="statusText" data-i18n="pill_disconnected">未連線</span></span>
+      </header>
+
+      <main id="top">
+        <div class="hero">
+          <h1 class="hero-word" id="heroWord" data-i18n="hero_disconnected">未連線</h1>
+          <p class="hero-sub" data-i18n="hero_sub">在 BLE Link 裡打開這頁，連上盒子就能按開關。</p>
         </div>
-        <div class="char-info mono" id="charInfo"></div>
-        <label class="field-label" for="presetSel">藍牙模組類型（Service UUID）</label>
-        <select id="presetSel">
-          <option value="auto" selected>自動偵測 — 常見串列模組都試</option>
-          <option value="hm10">HM-10 / JDY / 通用模組（FFE0）</option>
-          <option value="fff0">FFF0 模組（FFF0 / FFF1）</option>
-          <option value="nus">Nordic UART（6E400001…）</option>
-          <option value="custom">自訂 UUID</option>
-        </select>
-        <div class="custom-uuid" id="customUuidBox">
-          <input type="text" id="customService" class="mono" placeholder="Service UUID，例如 0000ffe0-0000-1000-8000-00805f9b34fb" autocomplete="off" autocapitalize="off" spellcheck="false" />
-          <input type="text" id="customChar" class="mono" placeholder="Characteristic UUID（可留空，自動找可寫的）" autocomplete="off" autocapitalize="off" spellcheck="false" />
+
+        <div class="tiles">
+          <div class="tile"><span class="tile-v" id="tileConn" data-i18n="pill_disconnected">未連線</span><span class="tile-l" data-i18n="tile_conn">連線</span></div>
+          <div class="tile"><span class="tile-v" id="tileVer">—</span><span class="tile-l" data-i18n="tile_ver">盒子版本</span></div>
+          <div class="tile"><span class="tile-v" id="tileChar">—</span><span class="tile-l" data-i18n="tile_char">寫入特徵值</span></div>
+          <div class="tile"><span class="tile-v" id="tileSent">0</span><span class="tile-l" data-i18n="tile_sent">已送命令</span></div>
         </div>
-        <p class="hint">不確定盒子用哪顆模組就選「自動偵測」。連上後會自己找可寫的特徵值，不用先查 UUID。</p>
-        <div class="btn-row">
-          <button class="btn primary" id="connectBtn" type="button">連線到盒子</button>
-          <button class="btn danger" id="disconnectBtn" type="button" disabled>斷開</button>
+
+        <div class="banner" id="noBleBanner">
+          <strong data-i18n="banner_noble_title">這個瀏覽器沒有 Web Bluetooth</strong>
+          <span data-i18n="banner_noble_body">iPhone 請用 BLE Link App 打開這頁；Android／電腦請用 Chrome。Safari 本身連不了藍牙。</span>
         </div>
-      </section>
-      <section aria-labelledby="testH">
-        <h2 id="testH">測試連線</h2>
-        <div class="btn-row" style="margin-top:0">
-          <button class="btn" id="versionBtn" type="button" disabled>讀取版本（XSVS）</button>
+        <div class="banner" id="insecureBanner">
+          <strong data-i18n="banner_https_title">目前不是 HTTPS 連線</strong>
+          <span data-i18n="banner_https_body">Web Bluetooth 只在 HTTPS 頁面運作，請確認網址是 https 開頭。</span>
         </div>
-        <p class="hint" style="margin:10px 0 0">正常會在下方回應區看到 <span class="mono">Ver:27000002</span>，代表藍牙通了。</p>
-        <label class="field-label" for="manualInput">手動送命令</label>
-        <div class="manual-row">
-          <input type="text" id="manualInput" class="mono" placeholder="例如 PRE1" autocomplete="off" autocapitalize="characters" spellcheck="false" />
-          <button class="btn" id="manualSendBtn" type="button" disabled>送出</button>
-        </div>
-      </section>
-      <section aria-labelledby="newH">
-        <h2 id="newH">新增功能 <span class="tag">移植版 bin</span></h2>
-        <p class="hint">開關不會自動同步盒子實際狀態（盒子沒有查詢命令），畫面只代表你這次按了什麼。按下去後看下方回應區，盒子回傳一樣的命令字串就代表收到了，設定會寫進 Flash，重開機還在。</p>
-        <div id="newSwitches"></div>
-        <span class="seg-label">國家／地圖偽裝</span>
-        <span class="seg-desc">0x238 / 0x7FF，需 R79 開著才有效 · 命令 CTRY0–3</span>
-        <div class="seg" id="ctrySeg" role="group" aria-label="國家／地圖偽裝">
-          <button type="button" data-idx="0" aria-pressed="true" disabled>關</button>
-          <button type="button" data-idx="1" aria-pressed="false" disabled>US</button>
-          <button type="button" data-idx="2" aria-pressed="false" disabled>KR</button>
-          <button type="button" data-idx="3" aria-pressed="false" disabled>NZ</button>
-        </div>
-      </section>
-      <section aria-labelledby="oldH">
-        <h2 id="oldH">原有功能</h2>
-        <div id="oldSwitches"></div>
-        <span class="seg-label">盲區 BSD</span>
-        <span class="seg-desc">點按送出一次，不是持續開關</span>
-        <div class="seg" id="bsdSeg" role="group" aria-label="盲區 BSD">
-          <button type="button" data-cmd="BSD0" disabled>不動</button>
-          <button type="button" data-cmd="BSD1" disabled>開</button>
-          <button type="button" data-cmd="BSD2" disabled>關</button>
-        </div>
-      </section>
-      <section aria-labelledby="logH">
-        <div class="log-head">
-          <h2 id="logH">盒子回應</h2>
-          <button class="link-btn" id="clearLogBtn" type="button">清除</button>
-        </div>
-        <div class="log" id="logBox" aria-live="polite"><span class="empty">還沒有訊息。連線後按開關，盒子會把收到的命令原樣回傳。</span></div>
-      </section>
-      <footer>
-        <p>使用方式：盒子上電 → 在 BLE Link 裡打開這頁 → 點「連線到盒子」→ 在跳出的清單選盒子的藍牙名稱 → 連上後按開關。</p>
-        <p>連不上或找不到可寫特徵值時，先用 LightBlue 掃一次盒子，把 Service／Characteristic UUID 填到「自訂 UUID」再連。</p>
-      </footer>
-    </main>
+
+        <section id="connSec" aria-labelledby="connH">
+          <h2 id="connH" data-i18n="sec_conn">連線</h2>
+          <div class="char-info mono" id="charInfo"></div>
+
+          <label class="field-label" for="presetSel" data-i18n="preset_label">藍牙模組類型（Service UUID）</label>
+          <select id="presetSel">
+            <option value="auto" selected data-i18n="preset_auto">自動偵測 — 常見串列模組都試</option>
+            <option value="hm10" data-i18n="preset_hm10">HM-10 / JDY / 通用模組（FFE0）</option>
+            <option value="fff0" data-i18n="preset_fff0">FFF0 模組（FFF0 / FFF1）</option>
+            <option value="nus">Nordic UART（6E400001…）</option>
+            <option value="custom" data-i18n="preset_custom">自訂 UUID</option>
+          </select>
+          <div class="custom-uuid" id="customUuidBox">
+            <input type="text" id="customService" class="mono" data-i18n-ph="custom_service_ph" placeholder="Service UUID，例如 0000ffe0-0000-1000-8000-00805f9b34fb" autocomplete="off" autocapitalize="off" spellcheck="false" />
+            <input type="text" id="customChar" class="mono" data-i18n-ph="custom_char_ph" placeholder="Characteristic UUID（可留空，自動找可寫的）" autocomplete="off" autocapitalize="off" spellcheck="false" />
+          </div>
+          <p class="hint" data-i18n="preset_hint">不確定盒子用哪顆模組就選「自動偵測」。連上後會自己找可寫的特徵值，不用先查 UUID。</p>
+
+          <div class="btn-row">
+            <button class="btn primary" id="connectBtn" type="button" data-i18n="btn_connect">連線到盒子</button>
+            <button class="btn danger" id="disconnectBtn" type="button" disabled data-i18n="btn_disconnect">斷開</button>
+          </div>
+        </section>
+
+        <section id="testSec" aria-labelledby="testH">
+          <h2 id="testH" data-i18n="sec_test">測試連線</h2>
+          <div class="btn-row" style="margin-top:0">
+            <button class="btn" id="versionBtn" type="button" disabled data-i18n="btn_version">讀取版本（XSVS）</button>
+          </div>
+          <p class="hint" style="margin:10px 0 0" data-i18n="test_hint">正常會在下方回應區看到 Ver:27000002，代表藍牙通了。</p>
+          <label class="field-label" for="manualInput" data-i18n="manual_label">手動送命令</label>
+          <div class="manual-row">
+            <input type="text" id="manualInput" class="mono" data-i18n-ph="manual_ph" placeholder="例如 PRE1" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+            <button class="btn" id="manualSendBtn" type="button" disabled data-i18n="btn_send">送出</button>
+          </div>
+        </section>
+
+        <section id="newSec" aria-labelledby="newH">
+          <h2 id="newH"><span data-i18n="sec_new">新增功能</span> <span class="tag" data-i18n="tag_ported">移植版 bin</span></h2>
+          <p class="hint" data-i18n="new_hint">開關不會自動同步盒子實際狀態（盒子沒有查詢命令），畫面只代表你這次按了什麼。按下去後看下方回應區，盒子回傳一樣的命令字串就代表收到了，設定會寫進 Flash，重開機還在。</p>
+          <div id="newSwitches"></div>
+
+          <span class="seg-label" data-i18n="ctry_label">國家／地圖偽裝</span>
+          <span class="seg-desc" data-i18n="ctry_desc">0x238 / 0x7FF，需 R79 開著才有效 · 命令 CTRY0–3</span>
+          <div class="seg" id="ctrySeg" role="group" aria-label="Country / map spoof">
+            <button type="button" data-idx="0" aria-pressed="true" disabled data-i18n="ctry_off">關</button>
+            <button type="button" data-idx="1" aria-pressed="false" disabled>US</button>
+            <button type="button" data-idx="2" aria-pressed="false" disabled>KR</button>
+            <button type="button" data-idx="3" aria-pressed="false" disabled>NZ</button>
+          </div>
+        </section>
+
+        <section id="oldSec" aria-labelledby="oldH">
+          <h2 id="oldH" data-i18n="sec_old">原有功能</h2>
+          <div id="oldSwitches"></div>
+
+          <span class="seg-label" data-i18n="bsd_label">盲區 BSD</span>
+          <span class="seg-desc" data-i18n="bsd_desc">點按送出一次，不是持續開關</span>
+          <div class="seg" id="bsdSeg" role="group" aria-label="Blind spot BSD">
+            <button type="button" data-cmd="BSD0" disabled data-i18n="bsd_none">不動</button>
+            <button type="button" data-cmd="BSD1" disabled data-i18n="bsd_on">開</button>
+            <button type="button" data-cmd="BSD2" disabled data-i18n="bsd_off">關</button>
+          </div>
+        </section>
+
+        <section id="logSec" aria-labelledby="logH">
+          <div class="log-head">
+            <h2 id="logH" data-i18n="sec_log">盒子回應</h2>
+            <button class="link-btn" id="clearLogBtn" type="button" data-i18n="btn_clear">清除</button>
+          </div>
+          <div class="log" id="logBox" aria-live="polite"></div>
+        </section>
+
+        <section id="settingsSec" aria-labelledby="settingsH">
+          <h2 id="settingsH" data-i18n="sec_settings">設定</h2>
+          <div class="set-row">
+            <span class="seg-label" data-i18n="lang_label">語言</span>
+            <div class="seg" id="langSeg" role="group" aria-label="Language">
+              <button type="button" data-lang="zh-TW" aria-pressed="true">繁體中文</button>
+              <button type="button" data-lang="zh-CN" aria-pressed="false">简体中文</button>
+              <button type="button" data-lang="en" aria-pressed="false">English</button>
+            </div>
+          </div>
+          <div class="set-row">
+            <span class="seg-label" data-i18n="theme_label">外觀</span>
+            <div class="seg" id="themeSeg" role="group" aria-label="Appearance">
+              <button type="button" data-theme="system" aria-pressed="true" data-i18n="theme_system">跟隨系統</button>
+              <button type="button" data-theme="light" aria-pressed="false" data-i18n="theme_light">淺色</button>
+              <button type="button" data-theme="dark" aria-pressed="false" data-i18n="theme_dark">深色</button>
+            </div>
+          </div>
+          <footer>
+            <p data-i18n="footer_1">使用方式：盒子上電 → 在 BLE Link 裡打開這頁 → 點「連線到盒子」→ 在跳出的清單選盒子的藍牙名稱 → 連上後按開關。</p>
+            <p data-i18n="footer_2">連不上或找不到可寫特徵值時，先用 LightBlue 掃一次盒子，把 Service／Characteristic UUID 填到「自訂 UUID」再連。</p>
+          </footer>
+        </section>
+      </main>
+
+      <nav class="tabbar">
+        <button type="button" data-target="top" class="active" data-i18n="tab_home">主頁</button>
+        <button type="button" data-target="newSec" data-i18n="tab_switches">開關</button>
+        <button type="button" data-target="settingsSec" data-i18n="tab_settings">設定</button>
+      </nav>
+    </div>
+
     <script>
       (function () {
         'use strict';
+
+        /* ---------- i18n ---------- */
+        var I18N = {
+          'zh-TW': {
+            gate_prompt: '請輸入開頁密碼',
+            gate_ph: '密碼',
+            gate_enter: '進入',
+            gate_wrong: '密碼不對，請重試',
+            gate_unsupported: '此瀏覽器不支援密碼檢查，請改用 BLE Link 或 Chrome 開這頁',
+            hero_disconnected: '未連線',
+            hero_connecting: '連線中…',
+            hero_connected: '已連線',
+            hero_sub: '在 BLE Link 裡打開這頁，連上盒子就能按開關。',
+            pill_disconnected: '未連線',
+            pill_selecting: '選擇裝置中…',
+            pill_connecting: '連線中',
+            pill_connected: '已連線',
+            pill_dropped: '未連線（已斷開）',
+            tile_conn: '連線',
+            tile_ver: '盒子版本',
+            tile_char: '寫入特徵值',
+            tile_sent: '已送命令',
+            sec_conn: '連線',
+            preset_label: '藍牙模組類型（Service UUID）',
+            preset_auto: '自動偵測 — 常見串列模組都試',
+            preset_hm10: 'HM-10 / JDY / 通用模組（FFE0）',
+            preset_fff0: 'FFF0 模組（FFF0 / FFF1）',
+            preset_custom: '自訂 UUID',
+            custom_service_ph: 'Service UUID，例如 0000ffe0-0000-1000-8000-00805f9b34fb',
+            custom_char_ph: 'Characteristic UUID（可留空，自動找可寫的）',
+            preset_hint: '不確定盒子用哪顆模組就選「自動偵測」。連上後會自己找可寫的特徵值，不用先查 UUID。',
+            btn_connect: '連線到盒子',
+            btn_disconnect: '斷開',
+            sec_test: '測試連線',
+            btn_version: '讀取版本（XSVS）',
+            test_hint: '正常會在下方回應區看到 Ver:27000002，代表藍牙通了。',
+            manual_label: '手動送命令',
+            manual_ph: '例如 PRE1',
+            btn_send: '送出',
+            sec_new: '新增功能',
+            tag_ported: '移植版 bin',
+            new_hint: '開關不會自動同步盒子實際狀態（盒子沒有查詢命令），畫面只代表你這次按了什麼。按下去後看下方回應區，盒子回傳一樣的命令字串就代表收到了，設定會寫進 Flash，重開機還在。',
+            ctry_label: '國家／地圖偽裝',
+            ctry_desc: '0x238 / 0x7FF，需 R79 開著才有效 · 命令 CTRY0–3',
+            ctry_off: '關',
+            sec_old: '原有功能',
+            bsd_label: '盲區 BSD',
+            bsd_desc: '點按送出一次，不是持續開關',
+            bsd_none: '不動',
+            bsd_on: '開',
+            bsd_off: '關',
+            sec_log: '盒子回應',
+            btn_clear: '清除',
+            log_empty: '還沒有訊息。連線後按開關，盒子會把收到的命令原樣回傳。',
+            log_cleared: '紀錄已清除。',
+            sec_settings: '設定',
+            lang_label: '語言',
+            theme_label: '外觀',
+            theme_system: '跟隨系統',
+            theme_light: '淺色',
+            theme_dark: '深色',
+            footer_1: '使用方式：盒子上電 → 在 BLE Link 裡打開這頁 → 點「連線到盒子」→ 在跳出的清單選盒子的藍牙名稱 → 連上後按開關。',
+            footer_2: '連不上或找不到可寫特徵值時，先用 LightBlue 掃一次盒子，把 Service／Characteristic UUID 填到「自訂 UUID」再連。',
+            banner_noble_title: '這個瀏覽器沒有 Web Bluetooth',
+            banner_noble_body: 'iPhone 請用 BLE Link App 打開這頁；Android／電腦請用 Chrome。Safari 本身連不了藍牙。',
+            banner_https_title: '目前不是 HTTPS 連線',
+            banner_https_body: 'Web Bluetooth 只在 HTTPS 頁面運作，請確認網址是 https 開頭。',
+            tab_home: '主頁',
+            tab_switches: '開關',
+            tab_settings: '設定',
+            sw_r79_name: 'R79 歐規解鎖',
+            sw_r79_desc: '0x3FD MUX1，解除歐規限制',
+            sw_isa_name: 'ISA 警示音抑制',
+            sw_isa_desc: '0x399 bit13',
+            sw_cap_name: '連續 AP',
+            sw_cap_desc: 'AP 脫離後自動重接（撥桿法）',
+            sw_fsd_name: 'FSD 視覺化',
+            sw_fsd_desc: '0x3FD MUX0 bit46',
+            sw_vis_name: '視覺速度控制',
+            sw_vis_desc: '0x3FD MUX1 data[6] bit1',
+            sw_nou_name: '免確認變道',
+            sw_nou_desc: '0x3F8，恢復確認變道設定',
+            sw_sum_name: '召喚心跳',
+            sw_sum_desc: '0x3F8，需 LAB 開著',
+            sw_pre_name: '電池預熱',
+            sw_pre_desc: '0x082 每 100ms，30 分鐘自動停',
+            sw_abl_name: 'NOA 自動打燈',
+            sw_abl_desc: '讀 0x24A，發 0x249',
+            sw_fap_name: '輔助變道 FAP',
+            sw_fap_desc: '0x293 自動變道',
+            sw_stop_name: '紅綠燈跟車 STOP',
+            sw_stop_desc: '0x3FD MUX0 bit38/39',
+            sw_lab_name: '駕駛監控 LAB',
+            sw_lab_desc: '0x3FD 關駕駛員監控',
+            sw_aps_name: 'AP 殺手 APS',
+            sw_aps_desc: 'nag killer',
+            log_no_ble: '這個瀏覽器沒有 Web Bluetooth，請改用 BLE Link 或 Chrome 開這頁',
+            log_gatt: '已連上 GATT，尋找可寫特徵值…',
+            log_ready: '可以按開關了。先按「讀取版本」測試也可以。',
+            log_cancelled: '已取消選擇裝置',
+            log_conn_fail: '連線失敗：',
+            log_disc: '連線中斷',
+            log_write_found: '寫入特徵值：',
+            log_notify_on: '已訂閱回應通知：',
+            log_notify_fail: '訂閱回應通知失敗，開關仍可送出，但看不到盒子回應',
+            log_no_notify: '這顆模組沒有通知特徵值，看不到盒子回應，開關仍可送出',
+            log_no_write: '找不到可寫的特徵值，這顆模組可能不是串列透傳，或 Service UUID 不在清單裡（試試自訂 UUID）',
+            log_not_conn: '還沒連線，無法送出：',
+            log_send_fail: '傳送失敗 '
+          },
+          'zh-CN': {
+            gate_prompt: '请输入开页密码',
+            gate_ph: '密码',
+            gate_enter: '进入',
+            gate_wrong: '密码不对，请重试',
+            gate_unsupported: '此浏览器不支持密码检查，请改用 BLE Link 或 Chrome 打开这页',
+            hero_disconnected: '未连接',
+            hero_connecting: '连接中…',
+            hero_connected: '已连接',
+            hero_sub: '在 BLE Link 里打开这页，连上盒子就能按开关。',
+            pill_disconnected: '未连接',
+            pill_selecting: '选择设备中…',
+            pill_connecting: '连接中',
+            pill_connected: '已连接',
+            pill_dropped: '未连接（已断开）',
+            tile_conn: '连接',
+            tile_ver: '盒子版本',
+            tile_char: '写入特征值',
+            tile_sent: '已发命令',
+            sec_conn: '连接',
+            preset_label: '蓝牙模块类型（Service UUID）',
+            preset_auto: '自动侦测 — 常见串口模块都试',
+            preset_hm10: 'HM-10 / JDY / 通用模块（FFE0）',
+            preset_fff0: 'FFF0 模块（FFF0 / FFF1）',
+            preset_custom: '自定义 UUID',
+            custom_service_ph: 'Service UUID，例如 0000ffe0-0000-1000-8000-00805f9b34fb',
+            custom_char_ph: 'Characteristic UUID（可留空，自动找可写的）',
+            preset_hint: '不确定盒子用哪颗模块就选「自动侦测」。连上后会自己找可写的特征值，不用先查 UUID。',
+            btn_connect: '连接到盒子',
+            btn_disconnect: '断开',
+            sec_test: '测试连接',
+            btn_version: '读取版本（XSVS）',
+            test_hint: '正常会在下方回应区看到 Ver:27000002，代表蓝牙通了。',
+            manual_label: '手动发送命令',
+            manual_ph: '例如 PRE1',
+            btn_send: '发送',
+            sec_new: '新增功能',
+            tag_ported: '移植版 bin',
+            new_hint: '开关不会自动同步盒子实际状态（盒子没有查询命令），画面只代表你这次按了什么。按下去后看下方回应区，盒子回传一样的命令字符串就代表收到了，设定会写进 Flash，重启后还在。',
+            ctry_label: '国家／地图伪装',
+            ctry_desc: '0x238 / 0x7FF，需 R79 开着才有效 · 命令 CTRY0–3',
+            ctry_off: '关',
+            sec_old: '原有功能',
+            bsd_label: '盲区 BSD',
+            bsd_desc: '点按发送一次，不是持续开关',
+            bsd_none: '不动',
+            bsd_on: '开',
+            bsd_off: '关',
+            sec_log: '盒子回应',
+            btn_clear: '清除',
+            log_empty: '还没有消息。连接后按开关，盒子会把收到的命令原样回传。',
+            log_cleared: '记录已清除。',
+            sec_settings: '设置',
+            lang_label: '语言',
+            theme_label: '外观',
+            theme_system: '跟随系统',
+            theme_light: '浅色',
+            theme_dark: '深色',
+            footer_1: '使用方式：盒子上电 → 在 BLE Link 里打开这页 → 点「连接到盒子」→ 在跳出的清单选盒子的蓝牙名称 → 连上后按开关。',
+            footer_2: '连不上或找不到可写特征值时，先用 LightBlue 扫一次盒子，把 Service／Characteristic UUID 填到「自定义 UUID」再连。',
+            banner_noble_title: '这个浏览器没有 Web Bluetooth',
+            banner_noble_body: 'iPhone 请用 BLE Link App 打开这页；Android／电脑请用 Chrome。Safari 本身连不了蓝牙。',
+            banner_https_title: '目前不是 HTTPS 连接',
+            banner_https_body: 'Web Bluetooth 只在 HTTPS 页面运作，请确认网址是 https 开头。',
+            tab_home: '主页',
+            tab_switches: '开关',
+            tab_settings: '设置',
+            sw_r79_name: 'R79 欧规解锁',
+            sw_r79_desc: '0x3FD MUX1，解除欧规限制',
+            sw_isa_name: 'ISA 警示音抑制',
+            sw_isa_desc: '0x399 bit13',
+            sw_cap_name: '连续 AP',
+            sw_cap_desc: 'AP 脱离后自动重接（拨杆法）',
+            sw_fsd_name: 'FSD 可视化',
+            sw_fsd_desc: '0x3FD MUX0 bit46',
+            sw_vis_name: '视觉速度控制',
+            sw_vis_desc: '0x3FD MUX1 data[6] bit1',
+            sw_nou_name: '免确认变道',
+            sw_nou_desc: '0x3F8，恢复确认变道设定',
+            sw_sum_name: '召唤心跳',
+            sw_sum_desc: '0x3F8，需 LAB 开着',
+            sw_pre_name: '电池预热',
+            sw_pre_desc: '0x082 每 100ms，30 分钟自动停',
+            sw_abl_name: 'NOA 自动打灯',
+            sw_abl_desc: '读 0x24A，发 0x249',
+            sw_fap_name: '辅助变道 FAP',
+            sw_fap_desc: '0x293 自动变道',
+            sw_stop_name: '红绿灯跟车 STOP',
+            sw_stop_desc: '0x3FD MUX0 bit38/39',
+            sw_lab_name: '驾驶监控 LAB',
+            sw_lab_desc: '0x3FD 关驾驶员监控',
+            sw_aps_name: 'AP 杀手 APS',
+            sw_aps_desc: 'nag killer',
+            log_no_ble: '这个浏览器没有 Web Bluetooth，请改用 BLE Link 或 Chrome 打开这页',
+            log_gatt: '已连上 GATT，寻找可写特征值…',
+            log_ready: '可以按开关了。先按「读取版本」测试也可以。',
+            log_cancelled: '已取消选择设备',
+            log_conn_fail: '连接失败：',
+            log_disc: '连接中断',
+            log_write_found: '写入特征值：',
+            log_notify_on: '已订阅回应通知：',
+            log_notify_fail: '订阅回应通知失败，开关仍可发送，但看不到盒子回应',
+            log_no_notify: '这颗模块没有通知特征值，看不到盒子回应，开关仍可发送',
+            log_no_write: '找不到可写的特征值，这颗模块可能不是串口透传，或 Service UUID 不在清单里（试试自定义 UUID）',
+            log_not_conn: '还没连接，无法发送：',
+            log_send_fail: '传送失败 '
+          },
+          'en': {
+            gate_prompt: 'Enter the page password',
+            gate_ph: 'Password',
+            gate_enter: 'Enter',
+            gate_wrong: 'Wrong password, try again',
+            gate_unsupported: 'This browser does not support the password check. Open this page in BLE Link or Chrome.',
+            hero_disconnected: 'Not connected',
+            hero_connecting: 'Connecting…',
+            hero_connected: 'Connected',
+            hero_sub: 'Open this page in BLE Link, connect to the box, and tap the switches.',
+            pill_disconnected: 'Not connected',
+            pill_selecting: 'Choosing device…',
+            pill_connecting: 'Connecting',
+            pill_connected: 'Connected',
+            pill_dropped: 'Disconnected',
+            tile_conn: 'Connection',
+            tile_ver: 'Box version',
+            tile_char: 'Write char.',
+            tile_sent: 'Commands sent',
+            sec_conn: 'Connection',
+            preset_label: 'Bluetooth module (Service UUID)',
+            preset_auto: 'Auto-detect — tries common serial modules',
+            preset_hm10: 'HM-10 / JDY / generic module (FFE0)',
+            preset_fff0: 'FFF0 module (FFF0 / FFF1)',
+            preset_custom: 'Custom UUID',
+            custom_service_ph: 'Service UUID, e.g. 0000ffe0-0000-1000-8000-00805f9b34fb',
+            custom_char_ph: 'Characteristic UUID (optional, auto-detects a writable one)',
+            preset_hint: 'Not sure which module the box uses? Pick Auto-detect. It finds a writable characteristic after connecting, no need to look up UUIDs first.',
+            btn_connect: 'Connect to box',
+            btn_disconnect: 'Disconnect',
+            sec_test: 'Test connection',
+            btn_version: 'Read version (XSVS)',
+            test_hint: 'You should see Ver:27000002 in the response log below, meaning Bluetooth works.',
+            manual_label: 'Send a command manually',
+            manual_ph: 'e.g. PRE1',
+            btn_send: 'Send',
+            sec_new: 'New features',
+            tag_ported: 'Ported build',
+            new_hint: 'Switches do not sync with the box (it has no query command). The screen only shows what you tapped. Check the response log below: if the box echoes the same command, it received it. Settings are saved to Flash and survive reboots.',
+            ctry_label: 'Country / map spoof',
+            ctry_desc: '0x238 / 0x7FF, needs R79 on · Commands CTRY0–3',
+            ctry_off: 'Off',
+            sec_old: 'Built-in features',
+            bsd_label: 'Blind spot (BSD)',
+            bsd_desc: 'Tap to send once, not a toggle',
+            bsd_none: 'None',
+            bsd_on: 'On',
+            bsd_off: 'Off',
+            sec_log: 'Box responses',
+            btn_clear: 'Clear',
+            log_empty: 'No messages yet. After connecting, tap a switch and the box will echo the command it received.',
+            log_cleared: 'Log cleared.',
+            sec_settings: 'Settings',
+            lang_label: 'Language',
+            theme_label: 'Appearance',
+            theme_system: 'Follow system',
+            theme_light: 'Light',
+            theme_dark: 'Dark',
+            footer_1: 'How to use: power the box → open this page in BLE Link → tap "Connect to box" → pick the box’s Bluetooth name → tap switches after connecting.',
+            footer_2: 'If it won’t connect or no writable characteristic is found, scan the box once with LightBlue and enter its Service / Characteristic UUID under "Custom UUID", then connect.',
+            banner_noble_title: 'This browser has no Web Bluetooth',
+            banner_noble_body: 'On iPhone, open this page in the BLE Link app. On Android or desktop, use Chrome. Safari cannot use Bluetooth.',
+            banner_https_title: 'Not an HTTPS connection',
+            banner_https_body: 'Web Bluetooth only works on HTTPS pages. Make sure the URL starts with https.',
+            tab_home: 'Home',
+            tab_switches: 'Switches',
+            tab_settings: 'Settings',
+            sw_r79_name: 'R79 EU unlock',
+            sw_r79_desc: '0x3FD MUX1, removes the EU restriction',
+            sw_isa_name: 'ISA chime suppression',
+            sw_isa_desc: '0x399 bit13',
+            sw_cap_name: 'Continuous AP',
+            sw_cap_desc: 'Re-engages AP automatically after it drops out (stalk method)',
+            sw_fsd_name: 'FSD visualization',
+            sw_fsd_desc: '0x3FD MUX0 bit46',
+            sw_vis_name: 'Visual speed control',
+            sw_vis_desc: '0x3FD MUX1 data[6] bit1',
+            sw_nou_name: 'No-confirm lane change',
+            sw_nou_desc: '0x3F8, restores the confirm lane change setting',
+            sw_sum_name: 'Summon heartbeat',
+            sw_sum_desc: '0x3F8, needs LAB on',
+            sw_pre_name: 'Battery preheat',
+            sw_pre_desc: '0x082 every 100ms, auto-stops after 30 min',
+            sw_abl_name: 'NOA auto-blinker',
+            sw_abl_desc: 'Reads 0x24A, sends 0x249',
+            sw_fap_name: 'Assisted lane change (FAP)',
+            sw_fap_desc: '0x293 auto lane change',
+            sw_stop_name: 'Traffic light follow (STOP)',
+            sw_stop_desc: '0x3FD MUX0 bit38/39',
+            sw_lab_name: 'Driver monitoring (LAB)',
+            sw_lab_desc: '0x3FD, driver monitoring off',
+            sw_aps_name: 'AP nag killer (APS)',
+            sw_aps_desc: 'nag killer',
+            log_no_ble: 'This browser has no Web Bluetooth. Open this page in BLE Link or Chrome.',
+            log_gatt: 'GATT connected, looking for a writable characteristic…',
+            log_ready: 'You can tap the switches now. You can also tap "Read version" to test first.',
+            log_cancelled: 'Device selection cancelled',
+            log_conn_fail: 'Connection failed: ',
+            log_disc: 'Connection lost',
+            log_write_found: 'Write characteristic: ',
+            log_notify_on: 'Subscribed to response notifications: ',
+            log_notify_fail: 'Failed to subscribe to notifications. Switches still work, but you won’t see box responses.',
+            log_no_notify: 'This module has no notification characteristic. You won’t see box responses, but switches still work.',
+            log_no_write: 'No writable characteristic found. This module may not be a serial pass-through, or its Service UUID is not in the list (try Custom UUID).',
+            log_not_conn: 'Not connected, cannot send: ',
+            log_send_fail: 'Send failed '
+          }
+        };
+        var LANGS = ['zh-TW', 'zh-CN', 'en'];
+        var lang = 'zh-TW';
+        try {
+          var savedLang = localStorage.getItem('s3c-lang');
+          if (savedLang && LANGS.indexOf(savedLang) !== -1) lang = savedLang;
+        } catch (e) {}
+        function t(key) {
+          var d = I18N[lang] || I18N['zh-TW'];
+          return (d[key] !== undefined ? d[key] : (I18N['zh-TW'][key] !== undefined ? I18N['zh-TW'][key] : key));
+        }
+
         /* ---------- 開頁密碼（純前端檢查，只擋隨便點開的人） ---------- */
         var GATE_HASH = '39508e5d5ad3618a323d6bf26916560720e0ffffc86163465511e4a7aa44eaed';
         var gateBox = document.getElementById('gateBox');
@@ -403,12 +863,13 @@
               hideGate();
             } else {
               gateErr.hidden = false;
+              gateErr.textContent = t('gate_wrong');
               gateInput.value = '';
               gateInput.focus();
             }
           }).catch(function () {
             gateErr.hidden = false;
-            gateErr.textContent = '此瀏覽器不支援密碼檢查，請改用 BLE Link 或 Chrome 開這頁';
+            gateErr.textContent = t('gate_unsupported');
           });
         }
         (function initGate() {
@@ -419,27 +880,45 @@
           gateInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
           gateInput.focus();
         })();
-        var NEW_SWITCHES = [
-          { key: 'r79', name: 'R79 歐規解鎖', desc: '0x3FD MUX1，解除歐規限制', on: 'R79ON1', off: 'R79ON0' },
-          { key: 'isa', name: 'ISA 警示音抑制', desc: '0x399 bit13', on: 'ISA1', off: 'ISA0' },
-          { key: 'cap', name: '連續 AP', desc: 'AP 脫離後自動重接（撥桿法）', on: 'CAP1', off: 'CAP0' },
-          { key: 'fsd', name: 'FSD 視覺化', desc: '0x3FD MUX0 bit46', on: 'FSD1', off: 'FSD0' },
-          { key: 'vis', name: '視覺速度控制', desc: '0x3FD MUX1 data[6] bit1', on: 'VIS1', off: 'VIS0' },
-          { key: 'nou', name: '免確認變道', desc: '0x3F8，恢復確認變道設定', on: 'NOU1', off: 'NOU0' },
-          { key: 'sum', name: '召喚心跳', desc: '0x3F8，需 LAB 開著', on: 'SUM1', off: 'SUM0' },
-          { key: 'pre', name: '電池預熱', desc: '0x082 每 100ms，30 分鐘自動停', on: 'PRE1', off: 'PRE0' },
-          { key: 'abl', name: 'NOA 自動打燈', desc: '讀 0x24A，發 0x249', on: 'ABL1', off: 'ABL0' }
-        ];
-        var OLD_SWITCHES = [
-          { key: 'fap', name: '輔助變道 FAP', desc: '0x293 自動變道', on: 'FAP1', off: 'FAP0' },
-          { key: 'stop', name: '紅綠燈跟車 STOP', desc: '0x3FD MUX0 bit38/39', on: 'STOP1', off: 'STOP0' },
-          { key: 'lab', name: '駕駛監控 LAB', desc: '0x3FD 關駕駛員監控', on: 'LAB1', off: 'LAB0' },
-          { key: 'aps', name: 'AP 殺手 APS', desc: 'nag killer', on: 'APS1', off: 'APS0' }
-        ];
-        var NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-        var KNOWN_SERVICES = [0xffe0, 0xfff0, NUS_SERVICE, 0xffe5, 0xffb0, '0000ff10-0000-1000-8000-00805f9b34fb'];
+
+        /* ---------- theme ---------- */
+        var themeMode = 'system';
+        try {
+          var savedTheme = localStorage.getItem('s3c-theme');
+          if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system') themeMode = savedTheme;
+        } catch (e) {}
+        function applyTheme() {
+          var root = document.documentElement;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (themeMode === 'light') {
+            root.setAttribute('data-theme', 'light');
+            if (meta) meta.setAttribute('content', '#f3f3f6');
+          } else if (themeMode === 'dark') {
+            root.setAttribute('data-theme', 'dark');
+            if (meta) meta.setAttribute('content', '#0a0a0d');
+          } else {
+            root.removeAttribute('data-theme');
+            if (meta) meta.setAttribute('content', window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? '#0a0a0d' : '#f3f3f6');
+          }
+          document.querySelectorAll('#themeSeg button').forEach(function (b) {
+            b.setAttribute('aria-pressed', b.getAttribute('data-theme') === themeMode ? 'true' : 'false');
+          });
+        }
+        document.querySelectorAll('#themeSeg button').forEach(function (b) {
+          b.addEventListener('click', function () {
+            themeMode = b.getAttribute('data-theme');
+            try { localStorage.setItem('s3c-theme', themeMode); } catch (e) {}
+            applyTheme();
+          });
+        });
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+            if (themeMode === 'system') applyTheme();
+          });
+        }
+
+        /* ---------- state ---------- */
         var $ = function (id) { return document.getElementById(id); };
-        var statusDot = $('statusDot'), statusText = $('statusText'), charInfo = $('charInfo');
         var connectBtn = $('connectBtn'), disconnectBtn = $('disconnectBtn');
         var versionBtn = $('versionBtn'), manualSendBtn = $('manualSendBtn'), manualInput = $('manualInput');
         var presetSel = $('presetSel'), customUuidBox = $('customUuidBox');
@@ -447,6 +926,61 @@
         var logStarted = false;
         var device = null, server = null, writeChar = null, notifyChar = null, writeWithResponse = true;
         var switchStates = {};
+        var connState = { mode: '', phase: 'idle', name: '' };
+        var boxVersion = '—', charShort = '—', sentCount = 0;
+        var ctryIdx = 0;
+
+        var NEW_SWITCHES = [
+          { key: 'r79', nameKey: 'sw_r79_name', descKey: 'sw_r79_desc', on: 'R79ON1', off: 'R79ON0' },
+          { key: 'isa', nameKey: 'sw_isa_name', descKey: 'sw_isa_desc', on: 'ISA1', off: 'ISA0' },
+          { key: 'cap', nameKey: 'sw_cap_name', descKey: 'sw_cap_desc', on: 'CAP1', off: 'CAP0' },
+          { key: 'fsd', nameKey: 'sw_fsd_name', descKey: 'sw_fsd_desc', on: 'FSD1', off: 'FSD0' },
+          { key: 'vis', nameKey: 'sw_vis_name', descKey: 'sw_vis_desc', on: 'VIS1', off: 'VIS0' },
+          { key: 'nou', nameKey: 'sw_nou_name', descKey: 'sw_nou_desc', on: 'NOU1', off: 'NOU0' },
+          { key: 'sum', nameKey: 'sw_sum_name', descKey: 'sw_sum_desc', on: 'SUM1', off: 'SUM0' },
+          { key: 'pre', nameKey: 'sw_pre_name', descKey: 'sw_pre_desc', on: 'PRE1', off: 'PRE0' },
+          { key: 'abl', nameKey: 'sw_abl_name', descKey: 'sw_abl_desc', on: 'ABL1', off: 'ABL0' }
+        ];
+        var OLD_SWITCHES = [
+          { key: 'fap', nameKey: 'sw_fap_name', descKey: 'sw_fap_desc', on: 'FAP1', off: 'FAP0' },
+          { key: 'stop', nameKey: 'sw_stop_name', descKey: 'sw_stop_desc', on: 'STOP1', off: 'STOP0' },
+          { key: 'lab', nameKey: 'sw_lab_name', descKey: 'sw_lab_desc', on: 'LAB1', off: 'LAB0' },
+          { key: 'aps', nameKey: 'sw_aps_name', descKey: 'sw_aps_desc', on: 'APS1', off: 'APS0' }
+        ];
+
+        var NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+        var KNOWN_SERVICES = [0xffe0, 0xfff0, NUS_SERVICE, 0xffe5, 0xffb0, '0000ff10-0000-1000-8000-00805f9b34fb'];
+
+        /* ---------- status ---------- */
+        function renderStatus() {
+          var pill = $('statusPill'), txt = $('statusText'), hero = $('heroWord'), tile = $('tileConn');
+          pill.className = 'pill' + (connState.mode === 'on' ? ' on' : connState.mode === 'busy' ? ' busy' : '');
+          var pillText, heroText, tileText;
+          if (connState.mode === 'on') {
+            pillText = t('pill_connected') + (connState.name ? ' ' + connState.name : '');
+            heroText = t('hero_connected');
+            tileText = t('pill_connected');
+          } else if (connState.mode === 'busy') {
+            pillText = connState.phase === 'selecting' ? t('pill_selecting') : t('pill_connecting') + (connState.name ? ' ' + connState.name : '');
+            heroText = t('hero_connecting');
+            tileText = t('hero_connecting');
+          } else {
+            pillText = connState.phase === 'dropped' ? t('pill_dropped') : t('pill_disconnected');
+            heroText = t('hero_disconnected');
+            tileText = t('pill_disconnected');
+          }
+          txt.textContent = pillText;
+          hero.textContent = heroText;
+          hero.className = 'hero-word' + (connState.mode === 'on' ? ' on' : connState.mode === 'busy' ? ' busy' : '');
+          tile.textContent = tileText;
+        }
+        function setStatus(mode, phase, name) {
+          connState.mode = mode;
+          connState.phase = phase;
+          connState.name = name || '';
+          renderStatus();
+        }
+
         /* ---------- log ---------- */
         function stamp() {
           var d = new Date();
@@ -456,32 +990,34 @@
         function addLog(kind, text) {
           if (!logStarted) { logBox.innerHTML = ''; logStarted = true; }
           var line = document.createElement('div');
-          var t = document.createElement('span');
-          t.className = 't'; t.textContent = stamp();
+          var tEl = document.createElement('span');
+          tEl.className = 't'; tEl.textContent = stamp();
           var m = document.createElement('span');
           m.className = kind;
           m.textContent = (kind === 'tx' ? '→ ' : kind === 'rx' ? '← ' : '') + text;
-          line.appendChild(t); line.appendChild(m);
+          line.appendChild(tEl); line.appendChild(m);
           logBox.appendChild(line);
           while (logBox.children.length > 80) logBox.removeChild(logBox.firstChild);
           logBox.scrollTop = logBox.scrollHeight;
         }
         $('clearLogBtn').addEventListener('click', function () {
-          logBox.innerHTML = '<span class="empty">紀錄已清除。</span>';
+          logBox.innerHTML = '<span class="empty">' + t('log_cleared') + '</span>';
           logStarted = false;
         });
+
         /* ---------- switches UI ---------- */
         function buildSwitches(list, container) {
+          container.innerHTML = '';
           list.forEach(function (def) {
-            switchStates[def.key] = false;
+            if (!(def.key in switchStates)) switchStates[def.key] = false;
             var row = document.createElement('div');
             row.className = 'sw-row';
             var label = document.createElement('div');
             label.className = 'sw-label';
             var nm = document.createElement('span');
-            nm.className = 'sw-name'; nm.textContent = def.name;
+            nm.className = 'sw-name'; nm.textContent = t(def.nameKey);
             var ds = document.createElement('span');
-            ds.className = 'sw-desc'; ds.textContent = def.desc;
+            ds.className = 'sw-desc'; ds.textContent = t(def.descKey);
             var cm = document.createElement('span');
             cm.className = 'sw-desc sw-cmd mono'; cm.textContent = def.on + ' / ' + def.off;
             label.appendChild(nm); label.appendChild(ds); label.appendChild(cm);
@@ -489,19 +1025,18 @@
             sw.type = 'button';
             sw.className = 'switch';
             sw.setAttribute('role', 'switch');
-            sw.setAttribute('aria-checked', 'false');
-            sw.setAttribute('aria-label', def.name);
-            sw.disabled = true;
+            sw.setAttribute('aria-checked', switchStates[def.key] ? 'true' : 'false');
+            sw.setAttribute('aria-label', t(def.nameKey));
+            sw.disabled = !(server && server.connected);
             sw.addEventListener('click', function () { onToggle(def, sw); });
             row.appendChild(label); row.appendChild(sw);
             container.appendChild(row);
             def.el = sw;
           });
         }
-        buildSwitches(NEW_SWITCHES, $('newSwitches'));
-        buildSwitches(OLD_SWITCHES, $('oldSwitches'));
+
         function setControlsEnabled(enabled) {
-          NEW_SWITCHES.concat(OLD_SWITCHES).forEach(function (def) { def.el.disabled = !enabled; });
+          NEW_SWITCHES.concat(OLD_SWITCHES).forEach(function (def) { if (def.el) def.el.disabled = !enabled; });
           versionBtn.disabled = !enabled;
           manualSendBtn.disabled = !enabled;
           disconnectBtn.disabled = !enabled;
@@ -509,6 +1044,7 @@
           var segs = document.querySelectorAll('#ctrySeg button, #bsdSeg button');
           for (var i = 0; i < segs.length; i++) segs[i].disabled = !enabled;
         }
+
         function onToggle(def, sw) {
           var next = !switchStates[def.key];
           var cmd = next ? def.on : def.off;
@@ -519,14 +1055,20 @@
             }
           });
         }
+
         /* ---------- segmented ---------- */
-        var ctryBtns = document.querySelectorAll('#ctrySeg button');
-        ctryBtns.forEach(function (btn) {
+        function syncCtrySeg() {
+          document.querySelectorAll('#ctrySeg button').forEach(function (b) {
+            b.setAttribute('aria-pressed', Number(b.getAttribute('data-idx')) === ctryIdx ? 'true' : 'false');
+          });
+        }
+        document.querySelectorAll('#ctrySeg button').forEach(function (btn) {
           btn.addEventListener('click', function () {
-            var idx = btn.getAttribute('data-idx');
+            var idx = Number(btn.getAttribute('data-idx'));
             sendCommand('CTRY' + idx).then(function (ok) {
               if (!ok) return;
-              ctryBtns.forEach(function (b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+              ctryIdx = idx;
+              syncCtrySeg();
             });
           });
         });
@@ -535,11 +1077,49 @@
             sendCommand(btn.getAttribute('data-cmd'));
           });
         });
-        /* ---------- BLE ---------- */
-        function setStatus(mode, text) {
-          statusDot.className = 'dot' + (mode === 'on' ? ' on' : mode === 'busy' ? ' busy' : '');
-          statusText.textContent = text;
+
+        /* ---------- language ---------- */
+        function applyLang() {
+          document.documentElement.lang = lang === 'en' ? 'en' : lang === 'zh-CN' ? 'zh-CN' : 'zh-TW';
+          document.querySelectorAll('[data-i18n]').forEach(function (el) {
+            el.textContent = t(el.getAttribute('data-i18n'));
+          });
+          document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+            el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph')));
+          });
+          buildSwitches(NEW_SWITCHES, $('newSwitches'));
+          buildSwitches(OLD_SWITCHES, $('oldSwitches'));
+          syncCtrySeg();
+          renderStatus();
+          $('tileVer').textContent = boxVersion;
+          $('tileChar').textContent = charShort;
+          $('tileSent').textContent = String(sentCount);
+          if (!logStarted) {
+            logBox.innerHTML = '<span class="empty">' + t('log_empty') + '</span>';
+          }
+          document.querySelectorAll('#langSeg button').forEach(function (b) {
+            b.setAttribute('aria-pressed', b.getAttribute('data-lang') === lang ? 'true' : 'false');
+          });
         }
+        document.querySelectorAll('#langSeg button').forEach(function (b) {
+          b.addEventListener('click', function () {
+            lang = b.getAttribute('data-lang');
+            try { localStorage.setItem('s3c-lang', lang); } catch (e) {}
+            applyLang();
+          });
+        });
+
+        /* ---------- tab bar ---------- */
+        document.querySelectorAll('.tabbar button').forEach(function (b) {
+          b.addEventListener('click', function () {
+            document.querySelectorAll('.tabbar button').forEach(function (x) { x.classList.remove('active'); });
+            b.classList.add('active');
+            var target = document.getElementById(b.getAttribute('data-target'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        });
+
+        /* ---------- BLE ---------- */
         function servicesForRequest() {
           var preset = presetSel.value;
           var list;
@@ -553,31 +1133,42 @@
           } else list = KNOWN_SERVICES.slice();
           return list;
         }
+
         function shortUuid(uuid) {
           if (typeof uuid === 'string' && uuid.length > 12) return uuid.slice(0, 8) + '…';
           return String(uuid);
         }
+
         function onDisconnected() {
           server = null; writeChar = null; notifyChar = null;
-          setStatus('', '未連線（已斷開）');
-          charInfo.textContent = '';
+          setStatus('', 'dropped');
+          $('charInfo').textContent = '';
+          charShort = '—';
+          $('tileChar').textContent = charShort;
           setControlsEnabled(false);
-          addLog('sys', '連線中斷');
+          addLog('sys', t('log_disc'));
         }
+
         function onNotify(event) {
           var value = event.target.value;
           var bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
           var s = '';
           for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
           s = s.replace(/[\r\n]+/g, ' ').trim();
-          if (s) addLog('rx', s);
+          if (!s) return;
+          addLog('rx', s);
+          if (s.indexOf('Ver:') === 0) {
+            boxVersion = s;
+            $('tileVer').textContent = boxVersion;
+          }
         }
+
         function connect() {
           if (!navigator.bluetooth) {
-            addLog('sys', '這個瀏覽器沒有 Web Bluetooth，請改用 BLE Link 或 Chrome 開這頁');
+            addLog('sys', t('log_no_ble'));
             return;
           }
-          setStatus('busy', '選擇裝置中…');
+          setStatus('busy', 'selecting');
           var options = {
             acceptAllDevices: true,
             optionalServices: servicesForRequest()
@@ -585,25 +1176,26 @@
           navigator.bluetooth.requestDevice(options).then(function (dev) {
             device = dev;
             device.addEventListener('gattserverdisconnected', onDisconnected);
-            setStatus('busy', '連線中：' + (device.name || '未命名裝置'));
+            setStatus('busy', 'connecting', device.name || '');
             return device.gatt.connect();
           }).then(function (srv) {
             server = srv;
-            addLog('sys', '已連上 GATT，尋找可寫特徵值…');
+            addLog('sys', t('log_gatt'));
             return discover(server);
           }).then(function () {
-            setStatus('on', '已連線：' + (device.name || '未命名裝置'));
+            setStatus('on', 'connected', device.name || '');
             setControlsEnabled(true);
-            addLog('sys', '可以按開關了。先按「讀取版本」測試也可以。');
+            addLog('sys', t('log_ready'));
           }).catch(function (err) {
-            setStatus('', '未連線');
+            setStatus('', 'idle');
             if (err && err.name === 'NotFoundError') {
-              addLog('sys', '已取消選擇裝置');
+              addLog('sys', t('log_cancelled'));
             } else {
-              addLog('sys', '連線失敗：' + (err && err.message ? err.message : err));
+              addLog('sys', t('log_conn_fail') + (err && err.message ? err.message : err));
             }
           });
         }
+
         function discover(srv) {
           var wantService = '', wantChar = '';
           if (presetSel.value === 'custom') {
@@ -631,24 +1223,27 @@
               });
             });
             return chain.then(function () {
-              if (!foundWrite) throw new Error('找不到可寫的特徵值，這顆模組可能不是串列透傳，或 Service UUID 不在清單裡（試試自訂 UUID）');
+              if (!foundWrite) throw new Error(t('log_no_write'));
               writeChar = foundWrite;
               notifyChar = foundNotify;
               var info = 'Service ' + shortUuid(writeChar.service.uuid) + ' / Char ' + shortUuid(writeChar.uuid) + '（' + (writeWithResponse ? 'write' : 'writeWithoutResponse') + '）';
-              charInfo.textContent = info;
-              addLog('sys', '寫入特徵值：' + info);
+              $('charInfo').textContent = info;
+              charShort = shortUuid(writeChar.uuid);
+              $('tileChar').textContent = charShort;
+              addLog('sys', t('log_write_found') + info);
               if (notifyChar) {
                 return notifyChar.startNotifications().then(function () {
                   notifyChar.addEventListener('characteristicvaluechanged', onNotify);
-                  addLog('sys', '已訂閱回應通知：' + shortUuid(notifyChar.uuid));
+                  addLog('sys', t('log_notify_on') + shortUuid(notifyChar.uuid));
                 }).catch(function () {
-                  addLog('sys', '訂閱回應通知失敗，開關仍可送出，但看不到盒子回應');
+                  addLog('sys', t('log_notify_fail'));
                 });
               }
-              addLog('sys', '這顆模組沒有通知特徵值，看不到盒子回應，開關仍可送出');
+              addLog('sys', t('log_no_notify'));
             });
           });
         }
+
         function disconnect() {
           if (device && device.gatt && device.gatt.connected) {
             device.gatt.disconnect();
@@ -656,10 +1251,11 @@
             onDisconnected();
           }
         }
+
         var sending = false;
         function sendCommand(cmd) {
           if (!writeChar || !server || !server.connected) {
-            addLog('sys', '還沒連線，無法送出：' + cmd);
+            addLog('sys', t('log_not_conn') + cmd);
             return Promise.resolve(false);
           }
           if (sending) return Promise.resolve(false);
@@ -672,14 +1268,17 @@
               : writeChar.writeValue(data);
           return p.then(function () {
             sending = false;
+            sentCount++;
+            $('tileSent').textContent = String(sentCount);
             addLog('tx', cmd);
             return true;
           }).catch(function (err) {
             sending = false;
-            addLog('sys', '傳送失敗 ' + cmd + '：' + (err && err.message ? err.message : err));
+            addLog('sys', t('log_send_fail') + cmd + '：' + (err && err.message ? err.message : err));
             return false;
           });
         }
+
         connectBtn.addEventListener('click', connect);
         disconnectBtn.addEventListener('click', disconnect);
         versionBtn.addEventListener('click', function () { sendCommand('XSVS'); });
@@ -694,11 +1293,16 @@
         presetSel.addEventListener('change', function () {
           customUuidBox.className = 'custom-uuid' + (presetSel.value === 'custom' ? ' show' : '');
         });
+
         /* ---------- environment checks ---------- */
         if (!navigator.bluetooth) $('noBleBanner').className = 'banner show';
         if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
           $('insecureBanner').className = 'banner show';
         }
+
+        /* ---------- init ---------- */
+        applyTheme();
+        applyLang();
       })();
     </script>
   </body>
