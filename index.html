@@ -98,7 +98,6 @@
         color: var(--ink-2);
       }
       .hint { font-size: 13px; color: var(--ink-2); margin: 0 0 12px; }
-
       /* status */
       .status-row { display: flex; align-items: center; gap: 10px; min-height: 28px; }
       .dot {
@@ -109,7 +108,6 @@
       .dot.busy { background: #d99a16; }
       .status-text { font-weight: 700; font-size: 16px; word-break: break-all; }
       .char-info { font-size: 12px; color: var(--ink-2); margin-top: 6px; word-break: break-all; }
-
       label.field-label { display: block; font-size: 13px; font-weight: 700; margin: 16px 0 6px; }
       select, input[type="text"] {
         width: 100%;
@@ -125,7 +123,6 @@
       .custom-uuid { display: none; margin-top: 10px; }
       .custom-uuid.show { display: block; }
       .custom-uuid input { margin-bottom: 8px; }
-
       .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
       button.btn {
         min-height: 48px;
@@ -143,7 +140,6 @@
       button.btn.danger { color: var(--danger); }
       button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
       button.btn:active:not(:disabled) { transform: translateY(1px); }
-
       .banner {
         border: 1px solid var(--warn-line);
         background: var(--warn-bg);
@@ -156,7 +152,6 @@
       }
       .banner.show { display: block; }
       .banner strong { display: block; margin-bottom: 2px; }
-
       /* switches */
       .sw-row {
         display: flex;
@@ -206,7 +201,6 @@
         button.switch::after { transition: none; }
         button.btn:active:not(:disabled) { transform: none; }
       }
-
       /* segmented */
       .seg {
         display: flex;
@@ -233,12 +227,10 @@
       .seg button:disabled { opacity: 0.45; cursor: not-allowed; }
       .seg-label { font-weight: 700; font-size: 16px; display: block; margin-top: 14px; }
       .seg-desc { font-size: 12.5px; color: var(--ink-2); display: block; margin-bottom: 8px; }
-
       /* manual send */
       .manual-row { display: flex; gap: 8px; }
       .manual-row input { flex: 1; min-width: 0; }
       .manual-row button { flex: none; }
-
       /* log */
       .log-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
       .log-head h2 { margin: 0; }
@@ -266,16 +258,41 @@
       .log .rx { color: var(--log-rx); }
       .log .sys { color: var(--log-sys); }
       .log .empty { color: var(--log-sys); }
-
       footer { color: var(--ink-2); font-size: 13px; padding: 4px 2px 0; }
       footer p { margin: 0 0 8px; }
+      /* 開頁密碼 */
+      .gate {
+        position: fixed; inset: 0; z-index: 50;
+        background: var(--bg);
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px;
+      }
+      .gate.hide { display: none; }
+      .gate-card { width: 100%; max-width: 320px; text-align: center; }
+      .gate-card h1 { font-size: 24px; margin-bottom: 4px; }
+      .gate-card p { color: var(--ink-2); font-size: 14px; margin: 0 0 8px; }
+      .gate-card input {
+        width: 100%; text-align: center;
+        font-size: 22px; letter-spacing: 6px;
+        margin: 10px 0;
+      }
+      .gate-card .btn { width: 100%; }
+      .gate-err { color: var(--danger); font-size: 14px; margin: 8px 0 0; }
     </style>
   </head>
   <body>
+    <div class="gate" id="gateBox">
+      <div class="gate-card">
+        <h1>SUPER_3CAN</h1>
+        <p>請輸入開頁密碼</p>
+        <input type="password" id="gateInput" inputmode="numeric" autocomplete="off" placeholder="密碼" />
+        <button class="btn primary" id="gateBtn" type="button">進入</button>
+        <p class="gate-err" id="gateErr" hidden>密碼不對，請重試</p>
+      </div>
+    </div>
     <main>
       <h1>SUPER_3CAN 網頁開關</h1>
       <p class="lede">在 BLE Link 裡打開這頁，連上盒子就能按開關。命令和小程序版相同，送出的是文字命令加 <span class="mono">\r\n</span>。</p>
-
       <div class="banner" id="noBleBanner">
         <strong>這個瀏覽器沒有 Web Bluetooth</strong>
         iPhone 請用 <b>BLE Link</b> App 打開這頁；Android／電腦請用 Chrome。Safari 本身連不了藍牙。
@@ -284,7 +301,6 @@
         <strong>目前不是 HTTPS 連線</strong>
         Web Bluetooth 只在 HTTPS 頁面運作，請確認網址是 https 開頭。
       </div>
-
       <section aria-labelledby="connH">
         <h2 id="connH">連線</h2>
         <div class="status-row">
@@ -292,7 +308,6 @@
           <span class="status-text" id="statusText">未連線</span>
         </div>
         <div class="char-info mono" id="charInfo"></div>
-
         <label class="field-label" for="presetSel">藍牙模組類型（Service UUID）</label>
         <select id="presetSel">
           <option value="auto" selected>自動偵測 — 常見串列模組都試</option>
@@ -306,13 +321,11 @@
           <input type="text" id="customChar" class="mono" placeholder="Characteristic UUID（可留空，自動找可寫的）" autocomplete="off" autocapitalize="off" spellcheck="false" />
         </div>
         <p class="hint">不確定盒子用哪顆模組就選「自動偵測」。連上後會自己找可寫的特徵值，不用先查 UUID。</p>
-
         <div class="btn-row">
           <button class="btn primary" id="connectBtn" type="button">連線到盒子</button>
           <button class="btn danger" id="disconnectBtn" type="button" disabled>斷開</button>
         </div>
       </section>
-
       <section aria-labelledby="testH">
         <h2 id="testH">測試連線</h2>
         <div class="btn-row" style="margin-top:0">
@@ -325,12 +338,10 @@
           <button class="btn" id="manualSendBtn" type="button" disabled>送出</button>
         </div>
       </section>
-
       <section aria-labelledby="newH">
         <h2 id="newH">新增功能 <span class="tag">移植版 bin</span></h2>
         <p class="hint">開關不會自動同步盒子實際狀態（盒子沒有查詢命令），畫面只代表你這次按了什麼。按下去後看下方回應區，盒子回傳一樣的命令字串就代表收到了，設定會寫進 Flash，重開機還在。</p>
         <div id="newSwitches"></div>
-
         <span class="seg-label">國家／地圖偽裝</span>
         <span class="seg-desc">0x238 / 0x7FF，需 R79 開著才有效 · 命令 CTRY0–3</span>
         <div class="seg" id="ctrySeg" role="group" aria-label="國家／地圖偽裝">
@@ -340,11 +351,9 @@
           <button type="button" data-idx="3" aria-pressed="false" disabled>NZ</button>
         </div>
       </section>
-
       <section aria-labelledby="oldH">
         <h2 id="oldH">原有功能</h2>
         <div id="oldSwitches"></div>
-
         <span class="seg-label">盲區 BSD</span>
         <span class="seg-desc">點按送出一次，不是持續開關</span>
         <div class="seg" id="bsdSeg" role="group" aria-label="盲區 BSD">
@@ -353,7 +362,6 @@
           <button type="button" data-cmd="BSD2" disabled>關</button>
         </div>
       </section>
-
       <section aria-labelledby="logH">
         <div class="log-head">
           <h2 id="logH">盒子回應</h2>
@@ -361,17 +369,56 @@
         </div>
         <div class="log" id="logBox" aria-live="polite"><span class="empty">還沒有訊息。連線後按開關，盒子會把收到的命令原樣回傳。</span></div>
       </section>
-
       <footer>
         <p>使用方式：盒子上電 → 在 BLE Link 裡打開這頁 → 點「連線到盒子」→ 在跳出的清單選盒子的藍牙名稱 → 連上後按開關。</p>
         <p>連不上或找不到可寫特徵值時，先用 LightBlue 掃一次盒子，把 Service／Characteristic UUID 填到「自訂 UUID」再連。</p>
       </footer>
     </main>
-
     <script>
       (function () {
         'use strict';
-
+        /* ---------- 開頁密碼（純前端檢查，只擋隨便點開的人） ---------- */
+        var GATE_HASH = '39508e5d5ad3618a323d6bf26916560720e0ffffc86163465511e4a7aa44eaed';
+        var gateBox = document.getElementById('gateBox');
+        var gateInput = document.getElementById('gateInput');
+        var gateErr = document.getElementById('gateErr');
+        function sha256Hex(str) {
+          var data = new TextEncoder().encode(str);
+          return crypto.subtle.digest('SHA-256', data).then(function (buf) {
+            var bytes = new Uint8Array(buf), s = '';
+            for (var i = 0; i < bytes.length; i++) s += ('0' + bytes[i].toString(16)).slice(-2);
+            return s;
+          });
+        }
+        function hideGate() {
+          gateBox.className = 'gate hide';
+          try { sessionStorage.setItem('s3c-unlocked', '1'); } catch (e) {}
+        }
+        function tryUnlock() {
+          var v = gateInput.value;
+          if (!v) return;
+          sha256Hex(v).then(function (h) {
+            if (h === GATE_HASH) {
+              gateErr.hidden = true;
+              hideGate();
+            } else {
+              gateErr.hidden = false;
+              gateInput.value = '';
+              gateInput.focus();
+            }
+          }).catch(function () {
+            gateErr.hidden = false;
+            gateErr.textContent = '此瀏覽器不支援密碼檢查，請改用 BLE Link 或 Chrome 開這頁';
+          });
+        }
+        (function initGate() {
+          var unlocked = false;
+          try { unlocked = sessionStorage.getItem('s3c-unlocked') === '1'; } catch (e) {}
+          if (unlocked) { hideGate(); return; }
+          document.getElementById('gateBtn').addEventListener('click', tryUnlock);
+          gateInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryUnlock(); });
+          gateInput.focus();
+        })();
         var NEW_SWITCHES = [
           { key: 'r79', name: 'R79 歐規解鎖', desc: '0x3FD MUX1，解除歐規限制', on: 'R79ON1', off: 'R79ON0' },
           { key: 'isa', name: 'ISA 警示音抑制', desc: '0x399 bit13', on: 'ISA1', off: 'ISA0' },
@@ -389,10 +436,8 @@
           { key: 'lab', name: '駕駛監控 LAB', desc: '0x3FD 關駕駛員監控', on: 'LAB1', off: 'LAB0' },
           { key: 'aps', name: 'AP 殺手 APS', desc: 'nag killer', on: 'APS1', off: 'APS0' }
         ];
-
         var NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
         var KNOWN_SERVICES = [0xffe0, 0xfff0, NUS_SERVICE, 0xffe5, 0xffb0, '0000ff10-0000-1000-8000-00805f9b34fb'];
-
         var $ = function (id) { return document.getElementById(id); };
         var statusDot = $('statusDot'), statusText = $('statusText'), charInfo = $('charInfo');
         var connectBtn = $('connectBtn'), disconnectBtn = $('disconnectBtn');
@@ -400,10 +445,8 @@
         var presetSel = $('presetSel'), customUuidBox = $('customUuidBox');
         var logBox = $('logBox');
         var logStarted = false;
-
         var device = null, server = null, writeChar = null, notifyChar = null, writeWithResponse = true;
         var switchStates = {};
-
         /* ---------- log ---------- */
         function stamp() {
           var d = new Date();
@@ -427,7 +470,6 @@
           logBox.innerHTML = '<span class="empty">紀錄已清除。</span>';
           logStarted = false;
         });
-
         /* ---------- switches UI ---------- */
         function buildSwitches(list, container) {
           list.forEach(function (def) {
@@ -458,7 +500,6 @@
         }
         buildSwitches(NEW_SWITCHES, $('newSwitches'));
         buildSwitches(OLD_SWITCHES, $('oldSwitches'));
-
         function setControlsEnabled(enabled) {
           NEW_SWITCHES.concat(OLD_SWITCHES).forEach(function (def) { def.el.disabled = !enabled; });
           versionBtn.disabled = !enabled;
@@ -468,7 +509,6 @@
           var segs = document.querySelectorAll('#ctrySeg button, #bsdSeg button');
           for (var i = 0; i < segs.length; i++) segs[i].disabled = !enabled;
         }
-
         function onToggle(def, sw) {
           var next = !switchStates[def.key];
           var cmd = next ? def.on : def.off;
@@ -479,7 +519,6 @@
             }
           });
         }
-
         /* ---------- segmented ---------- */
         var ctryBtns = document.querySelectorAll('#ctrySeg button');
         ctryBtns.forEach(function (btn) {
@@ -496,13 +535,11 @@
             sendCommand(btn.getAttribute('data-cmd'));
           });
         });
-
         /* ---------- BLE ---------- */
         function setStatus(mode, text) {
           statusDot.className = 'dot' + (mode === 'on' ? ' on' : mode === 'busy' ? ' busy' : '');
           statusText.textContent = text;
         }
-
         function servicesForRequest() {
           var preset = presetSel.value;
           var list;
@@ -516,12 +553,10 @@
           } else list = KNOWN_SERVICES.slice();
           return list;
         }
-
         function shortUuid(uuid) {
           if (typeof uuid === 'string' && uuid.length > 12) return uuid.slice(0, 8) + '…';
           return String(uuid);
         }
-
         function onDisconnected() {
           server = null; writeChar = null; notifyChar = null;
           setStatus('', '未連線（已斷開）');
@@ -529,7 +564,6 @@
           setControlsEnabled(false);
           addLog('sys', '連線中斷');
         }
-
         function onNotify(event) {
           var value = event.target.value;
           var bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
@@ -538,7 +572,6 @@
           s = s.replace(/[\r\n]+/g, ' ').trim();
           if (s) addLog('rx', s);
         }
-
         function connect() {
           if (!navigator.bluetooth) {
             addLog('sys', '這個瀏覽器沒有 Web Bluetooth，請改用 BLE Link 或 Chrome 開這頁');
@@ -571,7 +604,6 @@
             }
           });
         }
-
         function discover(srv) {
           var wantService = '', wantChar = '';
           if (presetSel.value === 'custom') {
@@ -617,7 +649,6 @@
             });
           });
         }
-
         function disconnect() {
           if (device && device.gatt && device.gatt.connected) {
             device.gatt.disconnect();
@@ -625,7 +656,6 @@
             onDisconnected();
           }
         }
-
         var sending = false;
         function sendCommand(cmd) {
           if (!writeChar || !server || !server.connected) {
@@ -650,7 +680,6 @@
             return false;
           });
         }
-
         connectBtn.addEventListener('click', connect);
         disconnectBtn.addEventListener('click', disconnect);
         versionBtn.addEventListener('click', function () { sendCommand('XSVS'); });
@@ -665,7 +694,6 @@
         presetSel.addEventListener('change', function () {
           customUuidBox.className = 'custom-uuid' + (presetSel.value === 'custom' ? ' show' : '');
         });
-
         /* ---------- environment checks ---------- */
         if (!navigator.bluetooth) $('noBleBanner').className = 'banner show';
         if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
