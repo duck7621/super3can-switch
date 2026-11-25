@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>SUPER_3CAN 網頁開關</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f2f1ed;
+        --surface: #ffffff;
+        --surface-2: #e9e7e1;
+        --ink: #191b1e;
+        --ink-2: #5a5e63;
+        --line: #d8d5cd;
+        --accent: #0f766e;
+        --accent-ink: #ffffff;
+        --accent-soft: #d9ede9;
+        --on: #0f766e;
+        --off-track: #c9c6bd;
+        --danger: #b3372c;
+        --warn-bg: #fdf3e0;
+        --warn-line: #e3c98a;
+        --warn-ink: #6d5410;
+        --log-bg: #14161a;
+        --log-ink: #d7dae0;
+        --log-tx: #7dd3c8;
+        --log-rx: #f5c86e;
+        --log-sys: #8b919c;
+        --radius: 10px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #101214;
+          --surface: #1a1d20;
+          --surface-2: #24282c;
+          --ink: #eceef0;
+          --ink-2: #9aa0a6;
+          --line: #33383d;
+          --accent: #2dd4bf;
+          --accent-ink: #06231f;
+          --accent-soft: #173a35;
+          --on: #2dd4bf;
+          --off-track: #4a5057;
+          --danger: #f0857a;
+          --warn-bg: #2c2410;
+          --warn-line: #6b5518;
+          --warn-ink: #ecc964;
+          --log-bg: #0a0b0d;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Noto Sans TC", -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+      main {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 20px 16px 48px;
+      }
+      h1 {
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 0.01em;
+        margin: 4px 0 6px;
+      }
+      .lede { color: var(--ink-2); margin: 0 0 20px; font-size: 15px; }
+      section {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-bottom: 14px;
+      }
+      section h2 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+      section h2 .tag {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--ink-2);
+      }
+      .hint { font-size: 13px; color: var(--ink-2); margin: 0 0 12px; }
+
+      /* status */
+      .status-row { display: flex; align-items: center; gap: 10px; min-height: 28px; }
+      .dot {
+        width: 12px; height: 12px; border-radius: 50%;
+        background: var(--off-track); flex: none;
+      }
+      .dot.on { background: var(--on); box-shadow: 0 0 0 4px var(--accent-soft); }
+      .dot.busy { background: #d99a16; }
+      .status-text { font-weight: 700; font-size: 16px; word-break: break-all; }
+      .char-info { font-size: 12px; color: var(--ink-2); margin-top: 6px; word-break: break-all; }
+
+      label.field-label { display: block; font-size: 13px; font-weight: 700; margin: 16px 0 6px; }
+      select, input[type="text"] {
+        width: 100%;
+        min-height: 48px;
+        padding: 10px 12px;
+        font: inherit;
+        font-size: 15px;
+        color: var(--ink);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      .custom-uuid { display: none; margin-top: 10px; }
+      .custom-uuid.show { display: block; }
+      .custom-uuid input { margin-bottom: 8px; }
+
+      .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      button.btn {
+        min-height: 48px;
+        padding: 10px 18px;
+        font: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: var(--surface-2);
+        color: var(--ink);
+        cursor: pointer;
+      }
+      button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      button.btn.danger { color: var(--danger); }
+      button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      button.btn:active:not(:disabled) { transform: translateY(1px); }
+
+      .banner {
+        border: 1px solid var(--warn-line);
+        background: var(--warn-bg);
+        color: var(--warn-ink);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        font-size: 14px;
+        margin-bottom: 14px;
+        display: none;
+      }
+      .banner.show { display: block; }
+      .banner strong { display: block; margin-bottom: 2px; }
+
+      /* switches */
+      .sw-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-top: 1px solid var(--line);
+        min-height: 64px;
+      }
+      .sw-row:first-of-type { border-top: none; }
+      .sw-label { flex: 1; min-width: 0; }
+      .sw-name { display: block; font-weight: 700; font-size: 16px; }
+      .sw-desc { display: block; font-size: 12.5px; color: var(--ink-2); margin-top: 1px; }
+      .sw-cmd { font-size: 11px; color: var(--ink-2); }
+      button.switch {
+        flex: none;
+        width: 58px; height: 34px;
+        border-radius: 999px;
+        border: none;
+        background: var(--off-track);
+        position: relative;
+        cursor: pointer;
+        padding: 0;
+        margin: -6px -4px;
+        min-height: 44px;
+        background-clip: content-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      button.switch::after {
+        content: "";
+        position: absolute;
+        top: 50%; left: 9px;
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        background: #fff;
+        transform: translateY(-50%);
+        transition: left 0.18s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+      }
+      button.switch[aria-checked="true"] { background-color: var(--on); }
+      button.switch[aria-checked="true"]::after { left: 27px; }
+      button.switch:disabled { opacity: 0.4; cursor: not-allowed; }
+      button.switch:focus-visible, button.btn:focus-visible, .seg button:focus-visible {
+        outline: 2px solid var(--accent); outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        button.switch::after { transition: none; }
+        button.btn:active:not(:disabled) { transform: none; }
+      }
+
+      /* segmented */
+      .seg {
+        display: flex;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .seg button {
+        flex: 1;
+        min-height: 48px;
+        font: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        background: var(--surface);
+        color: var(--ink-2);
+        border: none;
+        border-left: 1px solid var(--line);
+        cursor: pointer;
+        padding: 8px 4px;
+      }
+      .seg button:first-child { border-left: none; }
+      .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+      .seg button:disabled { opacity: 0.45; cursor: not-allowed; }
+      .seg-label { font-weight: 700; font-size: 16px; display: block; margin-top: 14px; }
+      .seg-desc { font-size: 12.5px; color: var(--ink-2); display: block; margin-bottom: 8px; }
+
+      /* manual send */
+      .manual-row { display: flex; gap: 8px; }
+      .manual-row input { flex: 1; min-width: 0; }
+      .manual-row button { flex: none; }
+
+      /* log */
+      .log-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+      .log-head h2 { margin: 0; }
+      button.link-btn {
+        min-height: 40px;
+        padding: 6px 10px;
+        font: inherit; font-size: 13px; font-weight: 700;
+        background: none; border: none; color: var(--accent); cursor: pointer;
+      }
+      .log {
+        background: var(--log-bg);
+        color: var(--log-ink);
+        border-radius: 8px;
+        padding: 12px;
+        height: 220px;
+        overflow-y: auto;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 12.5px;
+        line-height: 1.7;
+        margin-top: 10px;
+        word-break: break-all;
+      }
+      .log .t { color: var(--log-sys); margin-right: 6px; }
+      .log .tx { color: var(--log-tx); }
+      .log .rx { color: var(--log-rx); }
+      .log .sys { color: var(--log-sys); }
+      .log .empty { color: var(--log-sys); }
+
+      footer { color: var(--ink-2); font-size: 13px; padding: 4px 2px 0; }
+      footer p { margin: 0 0 8px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>SUPER_3CAN 網頁開關</h1>
+      <p class="lede">在 BLE Link 裡打開這頁，連上盒子就能按開關。命令和小程序版相同，送出的是文字命令加 <span class="mono">\r\n</span>。</p>
+
+      <div class="banner" id="noBleBanner">
+        <strong>這個瀏覽器沒有 Web Bluetooth</strong>
+        iPhone 請用 <b>BLE Link</b> App 打開這頁；Android／電腦請用 Chrome。Safari 本身連不了藍牙。
+      </div>
+      <div class="banner" id="insecureBanner">
+        <strong>目前不是 HTTPS 連線</strong>
+        Web Bluetooth 只在 HTTPS 頁面運作，請確認網址是 https 開頭。
+      </div>
+
+      <section aria-labelledby="connH">
+        <h2 id="connH">連線</h2>
+        <div class="status-row">
+          <span class="dot" id="statusDot" aria-hidden="true"></span>
+          <span class="status-text" id="statusText">未連線</span>
+        </div>
+        <div class="char-info mono" id="charInfo"></div>
+
+        <label class="field-label" for="presetSel">藍牙模組類型（Service UUID）</label>
+        <select id="presetSel">
+          <option value="auto" selected>自動偵測 — 常見串列模組都試</option>
+          <option value="hm10">HM-10 / JDY / 通用模組（FFE0）</option>
+          <option value="fff0">FFF0 模組（FFF0 / FFF1）</option>
+          <option value="nus">Nordic UART（6E400001…）</option>
+          <option value="custom">自訂 UUID</option>
+        </select>
+        <div class="custom-uuid" id="customUuidBox">
+          <input type="text" id="customService" class="mono" placeholder="Service UUID，例如 0000ffe0-0000-1000-8000-00805f9b34fb" autocomplete="off" autocapitalize="off" spellcheck="false" />
+          <input type="text" id="customChar" class="mono" placeholder="Characteristic UUID（可留空，自動找可寫的）" autocomplete="off" autocapitalize="off" spellcheck="false" />
+        </div>
+        <p class="hint">不確定盒子用哪顆模組就選「自動偵測」。連上後會自己找可寫的特徵值，不用先查 UUID。</p>
+
+        <div class="btn-row">
+          <button class="btn primary" id="connectBtn" type="button">連線到盒子</button>
+          <button class="btn danger" id="disconnectBtn" type="button" disabled>斷開</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="testH">
+        <h2 id="testH">測試連線</h2>
+        <div class="btn-row" style="margin-top:0">
+          <button class="btn" id="versionBtn" type="button" disabled>讀取版本（XSVS）</button>
+        </div>
+        <p class="hint" style="margin:10px 0 0">正常會在下方回應區看到 <span class="mono">Ver:27000002</span>，代表藍牙通了。</p>
+        <label class="field-label" for="manualInput">手動送命令</label>
+        <div class="manual-row">
+          <input type="text" id="manualInput" class="mono" placeholder="例如 PRE1" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+          <button class="btn" id="manualSendBtn" type="button" disabled>送出</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="newH">
+        <h2 id="newH">新增功能 <span class="tag">移植版 bin</span></h2>
+        <p class="hint">開關不會自動同步盒子實際狀態（盒子沒有查詢命令），畫面只代表你這次按了什麼。按下去後看下方回應區，盒子回傳一樣的命令字串就代表收到了，設定會寫進 Flash，重開機還在。</p>
+        <div id="newSwitches"></div>
+
+        <span class="seg-label">國家／地圖偽裝</span>
+        <span class="seg-desc">0x238 / 0x7FF，需 R79 開著才有效 · 命令 CTRY0–3</span>
+        <div class="seg" id="ctrySeg" role="group" aria-label="國家／地圖偽裝">
+          <button type="button" data-idx="0" aria-pressed="true" disabled>關</button>
+          <button type="button" data-idx="1" aria-pressed="false" disabled>US</button>
+          <button type="button" data-idx="2" aria-pressed="false" disabled>KR</button>
+          <button type="button" data-idx="3" aria-pressed="false" disabled>NZ</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="oldH">
+        <h2 id="oldH">原有功能</h2>
+        <div id="oldSwitches"></div>
+
+        <span class="seg-label">盲區 BSD</span>
+        <span class="seg-desc">點按送出一次，不是持續開關</span>
+        <div class="seg" id="bsdSeg" role="group" aria-label="盲區 BSD">
+          <button type="button" data-cmd="BSD0" disabled>不動</button>
+          <button type="button" data-cmd="BSD1" disabled>開</button>
+          <button type="button" data-cmd="BSD2" disabled>關</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="logH">
+        <div class="log-head">
+          <h2 id="logH">盒子回應</h2>
+          <button class="link-btn" id="clearLogBtn" type="button">清除</button>
+        </div>
+        <div class="log" id="logBox" aria-live="polite"><span class="empty">還沒有訊息。連線後按開關，盒子會把收到的命令原樣回傳。</span></div>
+      </section>
+
+      <footer>
+        <p>使用方式：盒子上電 → 在 BLE Link 裡打開這頁 → 點「連線到盒子」→ 在跳出的清單選盒子的藍牙名稱 → 連上後按開關。</p>
+        <p>連不上或找不到可寫特徵值時，先用 LightBlue 掃一次盒子，把 Service／Characteristic UUID 填到「自訂 UUID」再連。</p>
+      </footer>
+    </main>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var NEW_SWITCHES = [
+          { key: 'r79', name: 'R79 歐規解鎖', desc: '0x3FD MUX1，解除歐規限制', on: 'R79ON1', off: 'R79ON0' },
+          { key: 'isa', name: 'ISA 警示音抑制', desc: '0x399 bit13', on: 'ISA1', off: 'ISA0' },
+          { key: 'cap', name: '連續 AP', desc: 'AP 脫離後自動重接（撥桿法）', on: 'CAP1', off: 'CAP0' },
+          { key: 'fsd', name: 'FSD 視覺化', desc: '0x3FD MUX0 bit46', on: 'FSD1', off: 'FSD0' },
+          { key: 'vis', name: '視覺速度控制', desc: '0x3FD MUX1 data[6] bit1', on: 'VIS1', off: 'VIS0' },
+          { key: 'nou', name: '免確認變道', desc: '0x3F8，恢復確認變道設定', on: 'NOU1', off: 'NOU0' },
+          { key: 'sum', name: '召喚心跳', desc: '0x3F8，需 LAB 開著', on: 'SUM1', off: 'SUM0' },
+          { key: 'pre', name: '電池預熱', desc: '0x082 每 100ms，30 分鐘自動停', on: 'PRE1', off: 'PRE0' },
+          { key: 'abl', name: 'NOA 自動打燈', desc: '讀 0x24A，發 0x249', on: 'ABL1', off: 'ABL0' }
+        ];
+        var OLD_SWITCHES = [
+          { key: 'fap', name: '輔助變道 FAP', desc: '0x293 自動變道', on: 'FAP1', off: 'FAP0' },
+          { key: 'stop', name: '紅綠燈跟車 STOP', desc: '0x3FD MUX0 bit38/39', on: 'STOP1', off: 'STOP0' },
+          { key: 'lab', name: '駕駛監控 LAB', desc: '0x3FD 關駕駛員監控', on: 'LAB1', off: 'LAB0' },
+          { key: 'aps', name: 'AP 殺手 APS', desc: 'nag killer', on: 'APS1', off: 'APS0' }
+        ];
+
+        var NUS_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+        var KNOWN_SERVICES = [0xffe0, 0xfff0, NUS_SERVICE, 0xffe5, 0xffb0, '0000ff10-0000-1000-8000-00805f9b34fb'];
+
+        var $ = function (id) { return document.getElementById(id); };
+        var statusDot = $('statusDot'), statusText = $('statusText'), charInfo = $('charInfo');
+        var connectBtn = $('connectBtn'), disconnectBtn = $('disconnectBtn');
+        var versionBtn = $('versionBtn'), manualSendBtn = $('manualSendBtn'), manualInput = $('manualInput');
+        var presetSel = $('presetSel'), customUuidBox = $('customUuidBox');
+        var logBox = $('logBox');
+        var logStarted = false;
+
+        /* ---------- log ---------- */
+        function stamp() {
+          var d = new Date();
+          function p(n) { return (n < 10 ? '0' : '') + n; }
+          return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+        }
+        function addLog(kind, text) {
+          if (!logStarted) { logBox.innerHTML = ''; logStarted = true; }
+          var line = document.createElement('div');
+          var t = document.createElement('span');
+          t.className = 't'; t.textContent = stamp();
+          var m = document.createElement('span');
+          m.className = kind;
+          m.textContent = (kind === 'tx' ? '→ ' : kind === 'rx' ? '← ' : '') + text;
+          line.appendChild(t); line.appendChild(m);
+          logBox.appendChild(line);
+          while (logBox.children.length > 80) logBox.removeChild(logBox.firstChild);
+          logBox.scrollTop = logBox.scrollHeight;
+        }
+        $('clearLogBtn').addEventListener('click', function () {
+          logBox.innerHTML = '<span class="empty">紀錄已清除。</span>';
+          logStarted = false;
+        });
+
+        /* ---------- switches UI ---------- */
+        function buildSwitches(list, container) {
+          list.forEach(function (def) {
+            switchStates[def.key] = false;
+            var row = document.createElement('div');
+            row.className = 'sw-row';
+            var label = document.createElement('div');
+            label.className = 'sw-label';
+            var nm = document.createElement('span');
+            nm.className = 'sw-name'; nm.textContent = def.name;
+            var ds = document.createElement('span');
+            ds.className = 'sw-desc'; ds.textContent = def.desc;
+            var cm = document.createElement('span');
+            cm.className = 'sw-desc sw-cmd mono'; cm.textContent = def.on + ' / ' + def.off;
+            label.appendChild(nm); label.appendChild(ds); label.appendChild(cm);
+            var sw = document.createElement('button');
+            sw.type = 'button';
+            sw.className = 'switch';
+            sw.setAttribute('role', 'switch');
+            sw.setAttribute('aria-checked', 'false');
+            sw.setAttribute('aria-label', def.name);
+            sw.disabled = true;
+            sw.addEventListener('click', function () { onToggle(def, sw); });
+            row.appendChild(label); row.appendChild(sw);
+            container.appendChild(row);
+            def.el = sw;
+          });
+        }
+        buildSwitches(NEW_SWITCHES, $('newSwitches'));
+        buildSwitches(OLD_SWITCHES, $('oldSwitches'));
+
+        function setControlsEnabled(enabled) {
+          NEW_SWITCHES.concat(OLD_SWITCHES).forEach(function (def) { def.el.disabled = !enabled; });
+          versionBtn.disabled = !enabled;
+          manualSendBtn.disabled = !enabled;
+          disconnectBtn.disabled = !enabled;
+          connectBtn.disabled = enabled;
+          var segs = document.querySelectorAll('#ctrySeg button, #bsdSeg button');
+          for (var i = 0; i < segs.length; i++) segs[i].disabled = !enabled;
+        }
+
+        function onToggle(def, sw) {
+          var next = !switchStates[def.key];
+          var cmd = next ? def.on : def.off;
+          sendCommand(cmd).then(function (ok) {
+            if (ok) {
+              switchStates[def.key] = next;
+              sw.setAttribute('aria-checked', next ? 'true' : 'false');
+            }
+          });
+        }
+
+        /* ---------- segmented ---------- */
+        var ctryBtns = document.querySelectorAll('#ctrySeg button');
+        ctryBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var idx = btn.getAttribute('data-idx');
+            sendCommand('CTRY' + idx).then(function (ok) {
+              if (!ok) return;
+              ctryBtns.forEach(function (b) { b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+            });
+          });
+        });
+        document.querySelectorAll('#bsdSeg button').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            sendCommand(btn.getAttribute('data-cmd'));
+          });
+        });
+
+        /* ---------- BLE ---------- */
+        function setStatus(mode, text) {
+          statusDot.className = 'dot' + (mode === 'on' ? ' on' : mode === 'busy' ? ' busy' : '');
+          statusText.textContent = text;
+        }
+
+        function servicesForRequest() {
+          var preset = presetSel.value;
+          var list;
+          if (preset === 'hm10') list = [0xffe0];
+          else if (preset === 'fff0') list = [0xfff0];
+          else if (preset === 'nus') list = [NUS_SERVICE];
+          else if (preset === 'custom') {
+            list = KNOWN_SERVICES.slice();
+            var cs = $('customService').value.trim().toLowerCase();
+            if (cs) list.push(cs);
+          } else list = KNOWN_SERVICES.slice();
+          return list;
+        }
+
+        function shortUuid(uuid) {
+          if (typeof uuid === 'string' && uuid.length > 12) return uuid.slice(0, 8) + '…';
+          return String(uuid);
+        }
+
+        function onDisconnected() {
+          server = null; writeChar = null; notifyChar = null;
+          setStatus('', '未連線（已斷開）');
+          charInfo.textContent = '';
+          setControlsEnabled(false);
+          addLog('sys', '連線中斷');
+        }
+
+        function onNotify(event) {
+          var value = event.target.value;
+          var bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+          var s = '';
+          for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+          s = s.replace(/[\r\n]+/g, ' ').trim();
+          if (s) addLog('rx', s);
+        }
+
+        function connect() {
+          if (!navigator.bluetooth) {
+            addLog('sys', '這個瀏覽器沒有 Web Bluetooth，請改用 BLE Link 或 Chrome 開這頁');
+            return;
+          }
+          setStatus('busy', '選擇裝置中…');
+          var options = {
+            acceptAllDevices: true,
+            optionalServices: servicesForRequest()
+          };
+          navigator.bluetooth.requestDevice(options).then(function (dev) {
+            device = dev;
+            device.addEventListener('gattserverdisconnected', onDisconnected);
+            setStatus('busy', '連線中：' + (device.name || '未命名裝置'));
+            return device.gatt.connect();
+          }).then(function (srv) {
+            server = srv;
+            addLog('sys', '已連上 GATT，尋找可寫特徵值…');
+            return discover(server);
+          }).then(function () {
+            setStatus('on', '已連線：' + (device.name || '未命名裝置'));
+            setControlsEnabled(true);
+            addLog('sys', '可以按開關了。先按「讀取版本」測試也可以。');
+          }).catch(function (err) {
+            setStatus('', '未連線');
+            if (err && err.name === 'NotFoundError') {
+              addLog('sys', '已取消選擇裝置');
+            } else {
+              addLog('sys', '連線失敗：' + (err && err.message ? err.message : err));
+            }
+          });
+        }
+
+        function discover(srv) {
+          var wantService = '', wantChar = '';
+          if (presetSel.value === 'custom') {
+            wantService = $('customService').value.trim().toLowerCase();
+            wantChar = $('customChar').value.trim().toLowerCase();
+          }
+          return srv.getPrimaryServices().then(function (services) {
+            var chain = Promise.resolve();
+            var foundWrite = null, foundNotify = null;
+            services.forEach(function (service) {
+              chain = chain.then(function () {
+                return service.getCharacteristics().then(function (chars) {
+                  chars.forEach(function (ch) {
+                    var p = ch.properties || {};
+                    var isWant = wantChar && ch.uuid.toLowerCase() === wantChar;
+                    if (!foundWrite && (p.write || p.writeWithoutResponse) && (!wantChar || isWant)) {
+                      if (!wantService || service.uuid.toLowerCase() === wantService || isWant) {
+                        foundWrite = ch;
+                        writeWithResponse = !!p.write;
+                      }
+                    }
+                    if (!foundNotify && (p.notify || p.indicate)) foundNotify = ch;
+                  });
+                }).catch(function () { /* 某些服務讀不到特徵值，略過 */ });
+              });
+            });
+            return chain.then(function () {
+              if (!foundWrite) throw new Error('找不到可寫的特徵值，這顆模組可能不是串列透傳，或 Service UUID 不在清單裡（試試自訂 UUID）');
+              writeChar = foundWrite;
+              notifyChar = foundNotify;
+              var info = 'Service ' + shortUuid(writeChar.service.uuid) + ' / Char ' + shortUuid(writeChar.uuid) + '（' + (writeWithResponse ? 'write' : 'writeWithoutResponse') + '）';
+              charInfo.textContent = info;
+              addLog('sys', '寫入特徵值：' + info);
+              if (notifyChar) {
+                return notifyChar.startNotifications().then(function () {
+                  notifyChar.addEventListener('characteristicvaluechanged', onNotify);
+                  addLog('sys', '已訂閱回應通知：' + shortUuid(notifyChar.uuid));
+                }).catch(function () {
+                  addLog('sys', '訂閱回應通知失敗，開關仍可送出，但看不到盒子回應');
+                });
+              }
+              addLog('sys', '這顆模組沒有通知特徵值，看不到盒子回應，開關仍可送出');
+            });
+          });
+        }
+
+        function disconnect() {
+          if (device && device.gatt && device.gatt.connected) {
+            device.gatt.disconnect();
+          } else {
+            onDisconnected();
+          }
+        }
+
+        var sending = false;
+        function sendCommand(cmd) {
+          if (!writeChar || !server || !server.connected) {
+            addLog('sys', '還沒連線，無法送出：' + cmd);
+            return Promise.resolve(false);
+          }
+          if (sending) return Promise.resolve(false);
+          sending = true;
+          var data = new TextEncoder().encode(cmd + '\r\n');
+          var p = writeWithResponse && writeChar.writeValueWithResponse
+            ? writeChar.writeValueWithResponse(data)
+            : writeChar.writeValueWithoutResponse
+              ? writeChar.writeValueWithoutResponse(data)
+              : writeChar.writeValue(data);
+          return p.then(function () {
+            sending = false;
+            addLog('tx', cmd);
+            return true;
+          }).catch(function (err) {
+            sending = false;
+            addLog('sys', '傳送失敗 ' + cmd + '：' + (err && err.message ? err.message : err));
+            return false;
+          });
+        }
+
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        versionBtn.addEventListener('click', function () { sendCommand('XSVS'); });
+        manualSendBtn.addEventListener('click', function () {
+          var v = manualInput.value.trim().toUpperCase();
+          if (!v) return;
+          sendCommand(v).then(function (ok) { if (ok) manualInput.value = ''; });
+        });
+        manualInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') manualSendBtn.click();
+        });
+        presetSel.addEventListener('change', function () {
+          customUuidBox.className = 'custom-uuid' + (presetSel.value === 'custom' ? ' show' : '');
+        });
+
+        /* ---------- environment checks ---------- */
+        if (!navigator.bluetooth) $('noBleBanner').className = 'banner show';
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+          $('insecureBanner').className = 'banner show';
+        }
+      })();
+    </script>
+  </body>
+</html>
