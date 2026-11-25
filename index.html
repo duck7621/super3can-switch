@@ -401,6 +401,9 @@
         var logBox = $('logBox');
         var logStarted = false;
 
+        var device = null, server = null, writeChar = null, notifyChar = null, writeWithResponse = true;
+        var switchStates = {};
+
         /* ---------- log ---------- */
         function stamp() {
           var d = new Date();
